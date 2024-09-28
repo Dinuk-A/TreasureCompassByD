@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{head :: headTLFR}"></head>
+
+<head>
+    <!-- Main JS File -->
+    <script src="JSfiles/dashboard.js"></script>
+</head>
+
+<body>
+    <!-- greeting section ✅-->
+    <div class="row mt-4 bg-warning">
+        <h1 class="text-center text-success">Welcome <span class="text-primary" th:text="${loggedusername}"></span> ...
+        </h1>
+    </div>
+
+    <!-- 4 main cards section  ✅-->
+    <div class="row mx-auto mt-4 ">
+
+        <!-- Cash in hand card ✅-->
+        <div class="col-md-3">
+            <div class="card" style="height: 210px;">
+                <div class="card-header">
+                    <h3 class="text-primary my-auto text-center">Cash</h3>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title text-success d-flex justify-content-center">
+                        <span th:text="${cashInHandBalance}"></span>
+                        <span class="ms-4 text-primary" th:text="${baseCurrencyCode}"></span>
+                    </h2>
+                    <p class="card-text mt-2 mb-0">Balance In Physical Wallet.</p>
+                    <div class="mt-2 d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary"
+                            onclick="editCashInHand(window['loggedUserObject'])">
+                            Edit Amount
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic account cards section ,3 cards -->
+        <div class="col-md-9">
+            <div class="row" id="sectionAccCardList">
+                <!-- Cards will be populated dynamically here -->
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- row 2 -->
+    <div class="row mt-4 mx-auto mb-5">
+       
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-primary">Recent Transactions</h4>
+                </div>
+                <div class="card-body" id="trxListDisplayContainer">
+                    <ul class="list-group">
+                        
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Groceries</h6>
+                                <small class="text-muted">2024-09-26</small>
+                            </div>
+                            <span class="text-danger">- $50.00</span>
+                        </li>
+
+                        <!-- Transaction Item 2 -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Salary</h6>
+                                <small class="text-muted">2024-09-25</small>
+                            </div>
+                            <span class="text-success">+ $2,000.00</span>
+                        </li>
+
+                        <!-- Transaction Item 3 -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Electricity Bill</h6>
+                                <small class="text-muted">2024-09-24</small>
+                            </div>
+                            <span class="text-danger">- $120.00</span>
+                        </li>
+
+                        <!-- Transaction Item 4 -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Investment</h6>
+                                <small class="text-muted">2024-09-23</small>
+                            </div>
+                            <span class="text-success">+ $300.00</span>
+                        </li>
+
+                        <!-- Transaction Item 5 -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Dining Out</h6>
+                                <small class="text-muted">2024-09-22</small>
+                            </div>
+                            <span class="text-danger">- $45.00</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer text-end">
+                    <button class="btn btn-primary" onclick="viewAllTransactions()">View All Transactions</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- quick buttons -->
+        <div class="col-4">
+            <h4 class="text-primary mb-2 text-center">Quick Actions</h4>
+            <div class="d-flex flex-column">
+                <button class="btn btn-success btn-lg mb-3" onclick="$('#modalAddNewTrxRec').modal('show');">Add New
+                    Income Record</button>
+                <button class="btn btn-warning btn-lg mb-3" onclick="addExpense()">Add New Expense</button>
+                <button class="btn btn-info btn-lg" onclick="transferFunds()">Transfer Funds</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- </div> -->
+
+
+
+    <!-- hidden components -->
+
+    <!-- modal for edit cash in hand amount ✅-->
+    <div id="modalEditCashInHand" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-md ">
+            <div class="modal-content border-warning">
+
+                <!-- modal header-->
+                <div class="modal-header bg-dark">
+                    <h2 class="modal-title fw-bold text-warning">Edit Balance</h2>
+
+                    <button type="button" class="bg-warning  btn-close" data-bs-dismiss="modal"
+                        onclick="window.location.reload()"></button>
+                </div>
+
+                <!-- modal body -->
+                <div class="modal-body bg-light">
+
+                    <!-- form starts -->
+                    <form id="formEditCashInHand" onsubmit="return false">
+
+                        <!-- amount -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputAmount" class="form-lable fw-bold"> Amount :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <input id="inputAmount" type="number" class="form-control" value="0.00"
+                                    onkeyup="inputFieldValidator(this,'','loggedUserObject','cash_in_hand')" required>
+                            </div>
+                        </div>
+
+                        <!-- base currency -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="selectBaseCurrency" class="form-lable fw-bold"> Currency :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <select id="selectBaseCurrency" class="form-select"
+                                    onchange="selectDynamicVal(this,'','loggedUserObject','base_currency_id')" required>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- modal footer -->
+                <div class="modal-footer py-0">
+                    <button type="button" class="btn btn-primary" onclick="submitCashInHandChanges();">Save</button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- modal for add new account ✅ -->
+    <div id="modalAddNewAccount" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-md ">
+            <div class="modal-content border-warning">
+
+                <!-- modal header-->
+                <div class="modal-header bg-dark">
+                    <h2 class="modal-title fw-bold text-warning">Add New Account</h2>
+
+                    <button type="button" class="bg-warning  btn-close" data-bs-dismiss="modal"
+                        onclick="window.location.reload()"></button>
+                </div>
+
+                <!-- modal body -->
+                <div class="modal-body bg-light">
+
+                    <!-- form starts -->
+                    <form id="formAddNewAccount" onsubmit="return false">
+
+                        <!-- Account Name -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputAccName" class="form-lable fw-bold"> Account Name :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <input id="inputAccName" type="text" class="form-control"
+                                    onkeyup="inputFieldValidator(this,'','accountObj','acc_display_name')" required>
+                            </div>
+                        </div>
+
+                        <!--Account Number -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputAccNumber" class="form-lable fw-bold"> Account Number :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <input id="inputAccNumber" type="text" class="form-control"
+                                    onkeyup="inputFieldValidator(this,'','accountObj','acc_number')">
+                            </div>
+                        </div>
+
+                        <!-- acc type -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="selectAccType" class="form-lable fw-bold"> Account Type :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <select id="selectAccType" class="form-select"
+                                    onchange="selectDynamicVal(this,'','accountObj','acc_type_id')" required>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--Balance -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputAccBalance" class="form-lable fw-bold"> Account Balance :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <input id="inputAccBalance" type="number" class="form-control" value="0.00"
+                                    onkeyup="inputFieldValidator(this,'','accountObj','balance')" required>
+                            </div>
+                        </div>
+
+                        <!-- acc currency -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="selectAccCurrency" class="form-lable fw-bold"> Currency :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <select id="selectAccCurrency" class="form-select"
+                                    onchange="selectDynamicVal(this,'','accountObj','acc_currency_id')" required>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- modal footer -->
+                <div class="modal-footer py-0">
+                    <button type="button" class="btn btn-primary" onclick="submitNewAccount();">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal for add new income record -->
+    <div id="modalAddNewTrxRec" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content border-warning">
+
+                <!-- modal header -->
+                <div class="modal-header bg-dark">
+                    <h2 class="modal-title fw-bold text-warning">Add New Transaction</h2>
+                    <button type="button" class="bg-warning btn-close" data-bs-dismiss="modal"
+                        onclick="window.location.reload()"></button>
+                </div>
+
+                <!-- modal body -->
+                <div class="modal-body bg-light">
+
+                    <!-- form starts -->
+                    <form id="formAddNewTransaction" onsubmit="return false">
+
+                        <!-- type -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label class="form-label fw-bold"> Type :</label>
+                            </div>
+                            <div class="col-7">
+                                <div>
+                                    <input type="radio" class="btn-check" name="trxMaintype" id="income"
+                                        autocomplete="off" onclick="changeTrxCatList()" value="INCOME">
+
+                                    <label class="btn btn-outline-success" for="income">INCOME</label>
+
+                                    <input type="radio" class="btn-check" name="trxMaintype" id="expense"
+                                        autocomplete="off" onclick="changeTrxCatList()"
+                                        value="EXPENSE">
+
+                                    <label class="btn btn-outline-danger" for="expense">EXPENSE</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrxAmount" class="form-label fw-bold"> Amount :</label>
+                            </div>
+                            <div class="col-7">
+                                <input id="inputTrxAmount" type="number" class="form-control" step="0.01" min="0"
+                                    required onkeyup="inputFieldValidator(this,'','transactionObj','amount')" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Date -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrxDate" class="form-label fw-bold"> Transaction Date :</label>
+                            </div>
+                            <div class="col-7">
+                                <input id="inputTrxDate" type="date" class="form-control" required
+                                    onchange="inputFieldValidator(this,'','transactionObj','trx_date')" onkeydown="return false">
+                            </div>
+                        </div>
+
+                        <!-- To -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label class="form-label fw-bold"> To :</label>
+                            </div>
+                            <div class="col-7">
+                                <div>
+                                    <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
+                                        autocomplete="off"  onclick="toggleAccountSelection()" >
+                                    <label class="btn btn-outline-success" for="toWallet">To Wallet</label>
+
+                                    <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
+                                        autocomplete="off" onclick="toggleAccountSelection()">
+                                    <label class="btn btn-outline-danger" for="toAccount">To Account</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Selection -->
+                        <div class="row mt-2 d-none" id="accountSelection" >
+                            <div class="col-5">
+                                <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
+                            </div>
+                            <div class="col-7">
+                                <select id="selectTrxAccount" class="form-select"
+                                    onchange="selectDynamicVal(this,'','transactionObj','account_id')" >
+                                    
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Category -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="selectTrxCategory" class="form-label fw-bold"> Transaction Category
+                                    :</label>
+                            </div>
+                            <div class="col-7">
+                                <select id="selectTrxCategory" class="form-select"
+                                    onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required>
+                                    
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrxDescription" class="form-label fw-bold"> Description :</label>
+                            </div>
+                            <div class="col-7">
+                                <textarea id="inputTrxDescription" class="form-control" rows="2"
+                                    onkeyup="inputFieldValidator(this,'','transactionObj','description')"></textarea>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- modal footer -->
+                <div class="modal-footer py-0">
+                    <button type="reset" class="btn btn-secondary me-2">Clear</button>
+
+                    <button type="button" class="btn btn-primary" onclick="submitNewTransaction();">Save</button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <!-- to get the loggeduser id in backend ✅  -->
+    <div class="col-4 d-none">
+        <p class="text-warning text-center">
+            <span id="loggedUserIdHiddenValueID" th:text="${loggeduserID}"></span>
+        </p>
+    </div>
+
+
+
+</body>
+
+</html>
