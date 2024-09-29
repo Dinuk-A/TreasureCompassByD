@@ -241,10 +241,10 @@ const submitNewTransaction = () => {
         let postServiceResponse = ajaxRequest('/trx/save', 'POST', transactionObj)
         if (postServiceResponse == "OK") {
             alert('successfully saved');
-            // $('#modalAddNewAccount').modal('hide');
-            // formAddNewAccount.reset();
-            // refreshAddAccForm();
-            // window.location.reload();
+            $('#modalAddNewTrxRec').modal('hide');
+            formAddNewTransaction.reset();
+            refreshTrxForm();
+            window.location.reload();
 
         } else {
             alert("An error occured \n" + postServiceResponse);
@@ -368,3 +368,11 @@ const displayTrxList = () => {
 
 // ======TRX RECORDS=======
 
+
+//======TRANSFER======
+
+const refreshTransferForm =()=>{
+
+}
+
+//======TRANSFER======
