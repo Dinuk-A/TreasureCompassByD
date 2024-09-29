@@ -76,59 +76,75 @@ const refreshAccCards = () => {
 
     // Display account cards
     accListByUser.forEach(account => {
-        const mainCol = document.createElement('div');
-        mainCol.className = "col-md-4";
 
-        const cardDiv = document.createElement('div');
-        cardDiv.className = "card";
-        cardDiv.style.height = "210px";
+        // if (account.status) {
+            const mainCol = document.createElement('div');
+            mainCol.className = "col-md-4";
 
-        const cardHeader = document.createElement('div');
-        cardHeader.className = "card-header";
-        const h3Div = document.createElement('h3');
-        h3Div.className = "text-primary my-auto text-center";
-        h3Div.innerText = account.acc_display_name;
-        cardHeader.appendChild(h3Div);
+            const cardDiv = document.createElement('div');
+            cardDiv.className = "card";
+            cardDiv.style.height = "210px";
 
-        const cardBody = document.createElement('div');
-        cardBody.className = "card-body";
+            const cardHeader = document.createElement('div');
+            cardHeader.className = "card-header";
+            const h3Div = document.createElement('h3');
+            h3Div.className = "text-primary my-auto text-center";
+            h3Div.innerText = account.acc_display_name;
 
-        const h2Balance = document.createElement('h2');
-        h2Balance.className = "card-title text-success d-flex justify-content-center";
-        const spanBalance = document.createElement('span');
-        spanBalance.innerText = account.balance;
-        const spanCurrency = document.createElement('span');
-        spanCurrency.className = "ms-4 text-primary";
-        spanCurrency.innerText = account.acc_currency_id.code;
-        h2Balance.appendChild(spanBalance);
-        h2Balance.appendChild(spanCurrency);
-        cardBody.appendChild(h2Balance);
+            cardHeader.appendChild(h3Div);
 
-        const accDetailsDiv = document.createElement('div');
-        accDetailsDiv.className = "mt-3 text-start";
-        accDetailsDiv.innerHTML = `${account.acc_number} (${account.acc_type_id.name})`;
-        cardBody.appendChild(accDetailsDiv);
+            const cardBody = document.createElement('div');
+            cardBody.className = "card-body";
 
-        const buttonDiv = document.createElement('div');
-        buttonDiv.className = "mt-2 d-flex justify-content-end";
-        const button = document.createElement('button');
-        button.className = "btn btn-primary";
-        button.type = "button";
-        button.innerText = "Edit Amount";
-        button.onclick = function () {
-            refillAccountInfo(account);
-        };
-        buttonDiv.appendChild(button);
-        cardBody.appendChild(buttonDiv);
+            const h2Balance = document.createElement('h2');
+            h2Balance.className = "card-title text-success d-flex justify-content-center";
+            const spanBalance = document.createElement('span');
+            spanBalance.innerText = account.balance;
+            const spanCurrency = document.createElement('span');
+            spanCurrency.className = "ms-4 text-primary";
+            spanCurrency.innerText = account.acc_currency_id.code;
+            h2Balance.appendChild(spanBalance);
+            h2Balance.appendChild(spanCurrency);
+            cardBody.appendChild(h2Balance);
 
-        cardDiv.appendChild(cardHeader);
-        cardDiv.appendChild(cardBody);
-        mainCol.appendChild(cardDiv);
+            const accDetailsDiv = document.createElement('div');
+            accDetailsDiv.className = "mt-3 text-start";
+            accDetailsDiv.innerHTML = `${account.acc_number} (${account.acc_type_id.name})`;
+            cardBody.appendChild(accDetailsDiv);
 
-        sectionAccCardList.appendChild(mainCol);
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = "mt-2 d-flex justify-content-end";
+
+            const button = document.createElement('button');
+            button.className = "btn btn-danger";
+            button.type = "button";
+            button.innerText = "Edit Amount";
+            button.onclick = function () {
+                refillAccountInfo(account);
+            };
+
+
+            const dltBtn = document.createElement('button');
+            dltBtn.className = "btn btn-primary";
+            dltBtn.type = "button";
+            dltBtn.innerText = "Delete";
+            dltBtn.onclick = function () {
+                deleteAccount(account);
+            };
+
+            buttonDiv.appendChild(button);
+            buttonDiv.appendChild(dltBtn);
+            cardBody.appendChild(buttonDiv);
+
+            cardDiv.appendChild(cardHeader);
+            cardDiv.appendChild(cardBody);
+            mainCol.appendChild(cardDiv);
+
+            sectionAccCardList.appendChild(mainCol);
+        // }
     });
 
-    // If fewer than 3 accounts, show the "Add New Account" card dynamically
+    // If fewer than 3 accounts(also status is must true), show the "Add New Account" card dynamically
     if (accCount < 3) {
         // Create the "Add New Account" card
         const addNewAccountCard = document.createElement('div');
@@ -219,7 +235,6 @@ const submitNewAccount = () => {
 const refillAccountInfo = (obj) => {
 
     accountObj = JSON.parse(JSON.stringify(obj));
-    // obj eka edit karanna kalin clone kale na  
 
     $('#modalAddNewAccount').modal('show');
 
@@ -234,21 +249,41 @@ const refillAccountInfo = (obj) => {
     currs = ajaxGetRequest("currency/all");
     fillDataIntoSelect(selectAccCurrency, "Select Currency", currs, 'code', accountObj.acc_display_name);
 
-
 };
 
 //save acc changes
 const updateAccount = () => {
-    let putServiceResponce = ajaxRequest("/account/update", "PUT", accountObj);
-    if (putServiceResponce == "OK") {
-        alert("Successfully Updated");
-        $('#modalAddNewAccount').modal('hide');
-        formAddNewAccount.reset();
-        refreshAddAccForm();
-        window.location.reload();
+    const userConfirm = confirm("Are You Sure To Update? ");
+    if (userConfirm) {
+        let putServiceResponce = ajaxRequest("/account/update", "PUT", accountObj);
+        if (putServiceResponce == "OK") {
+            alert("Successfully Updated");
+            $('#modalAddNewAccount').modal('hide');
+            formAddNewAccount.reset();
+            refreshAddAccForm();
+            window.location.reload();
 
+        } else {
+            alert("An Error Occured " + putServiceResponce);
+        }
+    }
+}
+
+//delete account
+const deleteAccount = (ob) => {
+    const userConfirm = confirm('Are You Sure To Delete ?');
+
+    if (userConfirm) {
+        let deleteServerResponse = ajaxRequest("/account/delete", "DELETE", ob);
+
+        if (deleteServerResponse == "OK") {
+            alert("successfully Deleted");
+            // refreshDayPlanTable();
+        } else {
+            alert("An Error Occured \n" + deleteServerResponse);
+        }
     } else {
-        alert("An Error Occured " + putServiceResponce);
+        alert('Operator Cancelled The Task');
     }
 }
 

@@ -80,9 +80,10 @@ public class AccountController {
 
         try {
             accountEntityDelete.setStatus(false);
-            accDao.delete(accDao.getReferenceById(accountEntityDelete.getId()));
+            accountEntityDelete.setAcc_display_name("Deleted Account");
+            // accDao.delete(accDao.getReferenceById(accountEntityDelete.getId()));
 
-            // accDao.save(accountEntityDelete);
+            accDao.save(accountEntityDelete);
 
             return "OK";
         } catch (Exception e) {
