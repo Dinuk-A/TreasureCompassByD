@@ -59,7 +59,7 @@ const submitCashInHandChanges = () => {
 
 
 
-// ======NEW ACCOUNT=======
+// ======ACCOUNT=======
 //display acc cards based on account count of user
 const refreshAccCards = () => {
 
@@ -116,8 +116,7 @@ const refreshAccCards = () => {
         button.type = "button";
         button.innerText = "Edit Amount";
         button.onclick = function () {
-            // Add function to handle edit
-            editAmount(account.acc_id);
+            refillAccountInfo(account);
         };
         buttonDiv.appendChild(button);
         cardBody.appendChild(buttonDiv);
@@ -215,7 +214,45 @@ const submitNewAccount = () => {
         alert("Operation cancelled by the Operator");
     }
 };
-// ======NEW ACCOUNT=======
+
+//refill acc details
+const refillAccountInfo = (obj) => {
+
+    accountObj = JSON.parse(JSON.stringify(obj));
+    // obj eka edit karanna kalin clone kale na  
+
+    $('#modalAddNewAccount').modal('show');
+
+    inputAccName.value = accountObj.acc_display_name;
+    inputAccNumber.value = accountObj.acc_number;
+
+    acctypes = ajaxGetRequest("acctype/all");
+    fillDataIntoSelect(selectAccType, "Select Account Type", acctypes, 'name', accountObj.acc_display_name);
+
+    inputAccBalance.value = accountObj.balance.toFixed(2);
+
+    currs = ajaxGetRequest("currency/all");
+    fillDataIntoSelect(selectAccCurrency, "Select Currency", currs, 'code', accountObj.acc_display_name);
+
+
+};
+
+//save acc changes
+const updateAccount = () => {
+    let putServiceResponce = ajaxRequest("/account/update", "PUT", accountObj);
+    if (putServiceResponce == "OK") {
+        alert("Successfully Updated");
+        $('#modalAddNewAccount').modal('hide');
+        formAddNewAccount.reset();
+        refreshAddAccForm();
+        window.location.reload();
+
+    } else {
+        alert("An Error Occured " + putServiceResponce);
+    }
+}
+
+// ======ACCOUNT=======
 
 
 
@@ -311,7 +348,7 @@ const displayTrxList = () => {
 
         let toOrFrom;
         let plusOrMinus;
-        let classes ;
+        let classes;
 
         if (trx.trx_type == "INCOME") {
             toOrFrom = "To";
@@ -321,7 +358,7 @@ const displayTrxList = () => {
         } else {
             toOrFrom = "From";
             plusOrMinus = "- ";
-            classes = "col-3 text-danger fw-bold text-end" ;
+            classes = "col-3 text-danger fw-bold text-end";
         }
 
         //main row
@@ -349,7 +386,7 @@ const displayTrxList = () => {
 
         //amount col-3
         const amountDiv = document.createElement('div');
-        amountDiv.className = classes ;
+        amountDiv.className = classes;
         amountDiv.textContent = `${plusOrMinus} ${parseFloat(trx.amount).toFixed(2)}`;
 
 
@@ -371,7 +408,7 @@ const displayTrxList = () => {
 
 //======TRANSFER======
 
-const refreshTransferForm =()=>{
+const refreshTransferForm = () => {
 
 }
 

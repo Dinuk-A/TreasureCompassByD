@@ -62,7 +62,7 @@ public class AccountController {
     }
 
     // to update account info
-    @PutMapping("/account/update")
+    @PutMapping(value = "/account/update")
     public String updateAccountInfo(@RequestBody Account accountEntityPut) {
 
         try {

@@ -52,7 +52,7 @@
 
     <!-- row 2 -->
     <div class="row mt-4 mx-auto mb-5">
-       
+
         <div class="col-8">
             <div class="card">
                 <div class="card-header">
@@ -60,7 +60,7 @@
                 </div>
                 <div class="card-body" id="trxListDisplayContainer">
                     <ul class="list-group">
-                        
+
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-1">Groceries</h6>
@@ -274,7 +274,12 @@
 
                 <!-- modal footer -->
                 <div class="modal-footer py-0">
+                    <button type="reset" class="btn btn-danger">Clear</button>
+
+                    <button type="button" class="btn btn-warning" onclick="updateAccount();">Update</button>
+
                     <button type="button" class="btn btn-primary" onclick="submitNewAccount();">Save</button>
+
                 </div>
             </div>
         </div>
@@ -311,8 +316,7 @@
                                     <label class="btn btn-outline-success" for="income">INCOME</label>
 
                                     <input type="radio" class="btn-check" name="trxMaintype" id="expense"
-                                        autocomplete="off" onclick="changeTrxCatList()"
-                                        value="EXPENSE">
+                                        autocomplete="off" onclick="changeTrxCatList()" value="EXPENSE">
 
                                     <label class="btn btn-outline-danger" for="expense">EXPENSE</label>
                                 </div>
@@ -337,7 +341,8 @@
                             </div>
                             <div class="col-7">
                                 <input id="inputTrxDate" type="date" class="form-control" required
-                                    onchange="inputFieldValidator(this,'','transactionObj','trx_date')" onkeydown="return false">
+                                    onchange="inputFieldValidator(this,'','transactionObj','trx_date')"
+                                    onkeydown="return false">
                             </div>
                         </div>
 
@@ -349,7 +354,7 @@
                             <div class="col-7">
                                 <div>
                                     <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
-                                        autocomplete="off"  onclick="toggleAccountSelection()" >
+                                        autocomplete="off" onclick="toggleAccountSelection()">
                                     <label class="btn btn-outline-success" for="toWallet">To Wallet</label>
 
                                     <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
@@ -360,14 +365,14 @@
                         </div>
 
                         <!-- Account Selection -->
-                        <div class="row mt-2 d-none" id="accountSelection" >
+                        <div class="row mt-2 d-none" id="accountSelection">
                             <div class="col-5">
                                 <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
                             </div>
                             <div class="col-7">
                                 <select id="selectTrxAccount" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','account_id')" >
-                                    
+                                    onchange="selectDynamicVal(this,'','transactionObj','account_id')">
+
                                 </select>
                             </div>
                         </div>
@@ -381,7 +386,7 @@
                             <div class="col-7">
                                 <select id="selectTrxCategory" class="form-select"
                                     onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required>
-                                    
+
                                 </select>
                             </div>
                         </div>
@@ -405,13 +410,13 @@
                     <button type="reset" class="btn btn-secondary me-2">Clear</button>
 
                     <button type="button" class="btn btn-primary" onclick="submitNewTransaction();">Save</button>
-                    
+
                 </div>
             </div>
         </div>
     </div>
 
-   
+
     <!-- to get the loggeduser id in backend ✅  -->
     <div class="col-4 d-none">
         <p class="text-warning text-center">
