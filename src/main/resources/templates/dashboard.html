@@ -117,9 +117,10 @@
             <h4 class="text-primary mb-2 text-center">Quick Actions</h4>
             <div class="d-flex flex-column">
                 <button class="btn btn-success btn-lg mb-3" onclick="$('#modalAddNewTrxRec').modal('show');">Add New
-                    Income Record</button>
-                <button class="btn btn-warning btn-lg mb-3" onclick="addExpense()">Add New Expense</button>
-                <button class="btn btn-info btn-lg" onclick="transferFunds()">Transfer Funds</button>
+                    Transaction</button>
+
+                <button class="btn btn-info btn-lg" onclick="$('#modalInternalTransfers').modal('show');">Transfer
+                    Funds</button>
             </div>
         </div>
 
@@ -285,7 +286,7 @@
         </div>
     </div>
 
-    <!-- modal for add new income record -->
+    <!-- modal for add new income record ✅-->
     <div id="modalAddNewTrxRec" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-md">
             <div class="modal-content border-warning">
@@ -410,6 +411,100 @@
                     <button type="reset" class="btn btn-secondary me-2">Clear</button>
 
                     <button type="button" class="btn btn-primary" onclick="submitNewTransaction();">Save</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal for add internal transfers  -->
+    <div id="modalInternalTransfers" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-md ">
+            <div class="modal-content border-warning">
+
+                <!-- modal header-->
+                <div class="modal-header bg-dark">
+                    <h2 class="modal-title fw-bold text-warning">Transfer Funds</h2>
+
+                    <button type="button" class="bg-warning  btn-close" data-bs-dismiss="modal"
+                        onclick="window.location.reload()"></button>
+                </div>
+
+                <!-- modal body -->
+                <div class="modal-body bg-light">
+
+                    <!-- form starts -->
+                    <form id="formTransferFunds" onsubmit="return false">
+
+                        <div class="row mt-2">
+
+                            <!-- source acc -->
+                            <div class="col-5">
+                                <label for="selecttSourceAcc" class="form-lable fw-bold"> Source Account :</label>
+
+                                <select id="selectSourceAcc" class="form-select"
+                                    onchange="selectDynamicVal(this,'','trfrObj','source_account_id'); changesBasedOnSourceAcc(); " required>
+                                </select>
+                            </div>
+
+                            <div class="col-2 text-center my-auto">⏩</div>
+
+                            <!-- destination acc -->
+                            <div class="col-5">
+                                <label for="selectDestiAcc" class="form-lable fw-bold"> Destination Account :</label>
+
+                                <select disabled id="selectDestiAcc" class="form-select"
+                                    onchange="selectDynamicVal(this,'','trfrObj','destination_account_id')" required>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!--amount -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrfrAmount" class="form-lable fw-bold"> Amount :</label>
+                            </div>
+
+                            <div class="col-7">
+                                <input disabled id="inputTrfrAmount" type="number" class="form-control" value="0.00"
+                                    onkeyup="validateTrfrAmount();" required>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Date -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrxDate" class="form-label fw-bold"> Transaction Date :</label>
+                            </div>
+                            <div class="col-7">
+                                <input id="inputTrxDate" type="date" class="form-control" required
+                                    onchange="inputFieldValidator(this,'','trfrObj','transfer_date')"
+                                    onkeydown="return false" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label for="inputTrxDescription" class="form-label fw-bold"> Description :</label>
+                            </div>
+                            <div class="col-7">
+                                <textarea id="inputTrxDescription" class="form-control" rows="2"
+                                    onkeyup="inputFieldValidator(this,'','trfrObj','description')" disabled></textarea>
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+
+                <!-- modal footer -->
+                <div class="modal-footer py-0">
+                    <button type="reset" class="btn btn-danger">Clear</button>
+
+                    <button type="button" class="btn btn-warning" onclick="updateTransfer();" disabled>Update</button>
+
+                    <button type="button" class="btn btn-primary" onclick="submitNewTransfer();">Save</button>
 
                 </div>
             </div>

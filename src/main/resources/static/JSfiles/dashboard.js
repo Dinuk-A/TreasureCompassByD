@@ -8,8 +8,8 @@ window.addEventListener('load', () => {
     refreshAddAccForm();
     refreshCashInHandEditForm();
     refreshTrxForm();
-
     displayTrxList();
+    refreshTransferForm();
 
 });
 
@@ -78,73 +78,73 @@ const refreshAccCards = () => {
     accListByUser.forEach(account => {
 
         // if (account.status) {
-            const mainCol = document.createElement('div');
-            mainCol.className = "col-md-4";
+        const mainCol = document.createElement('div');
+        mainCol.className = "col-md-4";
 
-            const cardDiv = document.createElement('div');
-            cardDiv.className = "card";
-            cardDiv.style.height = "210px";
+        const cardDiv = document.createElement('div');
+        cardDiv.className = "card";
+        cardDiv.style.height = "210px";
 
-            const cardHeader = document.createElement('div');
-            cardHeader.className = "card-header";
-            const h3Div = document.createElement('h3');
-            h3Div.className = "text-primary my-auto text-center";
-            h3Div.innerText = account.acc_display_name;
+        const cardHeader = document.createElement('div');
+        cardHeader.className = "card-header";
+        const h3Div = document.createElement('h3');
+        h3Div.className = "text-primary my-auto text-center";
+        h3Div.innerText = account.acc_display_name;
 
-            cardHeader.appendChild(h3Div);
+        cardHeader.appendChild(h3Div);
 
-            const cardBody = document.createElement('div');
-            cardBody.className = "card-body";
+        const cardBody = document.createElement('div');
+        cardBody.className = "card-body";
 
-            const h2Balance = document.createElement('h2');
-            h2Balance.className = "card-title text-success d-flex justify-content-center";
-            const spanBalance = document.createElement('span');
-            spanBalance.innerText = account.balance;
-            const spanCurrency = document.createElement('span');
-            spanCurrency.className = "ms-4 text-primary";
-            spanCurrency.innerText = account.acc_currency_id.code;
-            h2Balance.appendChild(spanBalance);
-            h2Balance.appendChild(spanCurrency);
-            cardBody.appendChild(h2Balance);
+        const h2Balance = document.createElement('h2');
+        h2Balance.className = "card-title text-success d-flex justify-content-center";
+        const spanBalance = document.createElement('span');
+        spanBalance.innerText = account.balance;
+        const spanCurrency = document.createElement('span');
+        spanCurrency.className = "ms-4 text-primary";
+        spanCurrency.innerText = account.acc_currency_id.code;
+        h2Balance.appendChild(spanBalance);
+        h2Balance.appendChild(spanCurrency);
+        cardBody.appendChild(h2Balance);
 
-            const accDetailsDiv = document.createElement('div');
-            accDetailsDiv.className = "mt-3 text-start";
-            accDetailsDiv.innerHTML = `${account.acc_number} (${account.acc_type_id.name})`;
-            cardBody.appendChild(accDetailsDiv);
+        const accDetailsDiv = document.createElement('div');
+        accDetailsDiv.className = "mt-3 text-start";
+        accDetailsDiv.innerHTML = `${account.acc_number} (${account.acc_type_id.name})`;
+        cardBody.appendChild(accDetailsDiv);
 
-            const buttonDiv = document.createElement('div');
-            buttonDiv.className = "mt-2 d-flex justify-content-end";
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = "mt-2 d-flex justify-content-end";
 
-            const button = document.createElement('button');
-            button.className = "btn btn-danger";
-            button.type = "button";
-            button.innerText = "Edit Amount";
-            button.onclick = function () {
-                refillAccountInfo(account);
-            };
+        const button = document.createElement('button');
+        button.className = "btn btn-danger";
+        button.type = "button";
+        button.innerText = "Edit Amount";
+        button.onclick = function () {
+            refillAccountInfo(account);
+        };
 
 
-            const dltBtn = document.createElement('button');
-            dltBtn.className = "btn btn-primary";
-            dltBtn.type = "button";
-            dltBtn.innerText = "Delete";
-            dltBtn.onclick = function () {
-                deleteAccount(account);
-            };
+        const dltBtn = document.createElement('button');
+        dltBtn.className = "btn btn-primary";
+        dltBtn.type = "button";
+        dltBtn.innerText = "Delete";
+        dltBtn.onclick = function () {
+            deleteAccount(account);
+        };
 
-            buttonDiv.appendChild(button);
-            buttonDiv.appendChild(dltBtn);
-            cardBody.appendChild(buttonDiv);
+        buttonDiv.appendChild(button);
+        buttonDiv.appendChild(dltBtn);
+        cardBody.appendChild(buttonDiv);
 
-            cardDiv.appendChild(cardHeader);
-            cardDiv.appendChild(cardBody);
-            mainCol.appendChild(cardDiv);
+        cardDiv.appendChild(cardHeader);
+        cardDiv.appendChild(cardBody);
+        mainCol.appendChild(cardDiv);
 
-            sectionAccCardList.appendChild(mainCol);
+        sectionAccCardList.appendChild(mainCol);
         // }
     });
 
-    // If fewer than 3 accounts(also status is must true), show the "Add New Account" card dynamically
+    // If fewer than 3 accounts(and also status is must true), show the "Add New Account" card dynamically
     if (accCount < 3) {
         // Create the "Add New Account" card
         const addNewAccountCard = document.createElement('div');
@@ -301,7 +301,6 @@ const refreshTrxForm = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
     fillDataIntoSelect(selectTrxAccount, "Select Account", accListByUser, 'acc_display_name')
-    console.log(accListByUser);
 
 }
 
@@ -442,9 +441,120 @@ const displayTrxList = () => {
 
 
 //======TRANSFER======
-
+//get data to selects
 const refreshTransferForm = () => {
 
+    trfrObj = new Object;
+
+    let userID = loggedUserIdHiddenValueID.innerText;
+    accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
+    fillDataIntoSelect(selectSourceAcc, "Select Account", accListByUser, 'acc_display_name')
+}
+
+//change destination acc list without the source acc
+const changesBasedOnSourceAcc = () => {
+
+    //change destination acc list
+    selectDestiAcc.disabled = false;
+
+    let userID = loggedUserIdHiddenValueID.innerText;
+    defaultAccListByUser = ajaxGetRequest("/account/byuserid/" + userID);
+
+    let sourceSelectElement = document.getElementById('selectSourceAcc');
+
+    let selectedSourceAcc = JSON.parse(sourceSelectElement.value);
+
+    //also working
+    // let indexOfSelectedSourceAcc = defaultAccListByUser.map(acc => acc.acc_display_name).indexOf(selectedSourceAcc.acc_display_name);
+    // if (indexOfSelectedSourceAcc != -1) {
+    //     defaultAccListByUser.splice(indexOfSelectedSourceAcc, 1)
+    // }
+
+    let accNamesListOnly = defaultAccListByUser.map(acc => acc.acc_display_name);
+
+    let indexOfSelectedSourceAcc = accNamesListOnly.indexOf(selectedSourceAcc.acc_display_name);
+
+    if (indexOfSelectedSourceAcc != -1) {
+        defaultAccListByUser.splice(indexOfSelectedSourceAcc, 1);
+    }
+
+    console.log(accNamesListOnly);
+    console.log(indexOfSelectedSourceAcc);
+
+    fillDataIntoSelect(selectDestiAcc, "Select Account", defaultAccListByUser, 'acc_display_name');
+
+    //change amount
+    trfrObj.amount = null;
+    inputTrfrAmount.style.border = "2px solid #ced4da";
+    inputTrfrAmount.value = selectedSourceAcc.balance.toFixed(2);
+    inputTrfrAmount.disabled = false;
+
+    console.log("inputTrfrAmount end");
+
+    //others
+    inputTrxDate.disabled = false;
+    inputTrfrDescription.disabled = false;
+    
+    console.log("end");
+
+}
+
+//cant exceed the current value of the source acc when transfering
+// const passMaxTrfrAmount = () => {
+//     let sourceSelectElement = document.getElementById('selectSourceAcc');
+
+//     let selectedSourceAcc = JSON.parse(sourceSelectElement.value);
+
+//     inputTrfrAmount.value = selectedSourceAcc.balance.toFixed(2);
+// }
+
+//validate the transfering amount
+const validateTrfrAmount = () => {
+
+    let selectedSourceAcc = JSON.parse(selectSourceAcc.value);
+    let transferAmount = parseFloat(inputTrfrAmount.value);
+
+    if (transferAmount > selectedSourceAcc.balance) {
+        alert("Transfer amount exceeds the account balance");
+        trfrObj.amount = null;
+        inputTrfrAmount.style.border = "2px solid red";
+    }
+    else if (transferAmount <= 0) {
+        alert("Invalid amount: must be greater than zero");
+        trfrObj.amount = null;
+        inputTrfrAmount.style.border = "2px solid red";
+    } else {
+        trfrObj.amount = inputTrfrAmount.value;
+        inputTrfrAmount.style.border = "2px solid lime";
+    }
+
+
+}
+//     if (inputTrfrAmount.value = < selectedSourceAcc.balance) {
+// console.log("sad");
+//     // trfrObj.amount = inputTrfrAmount.value;
+
+
+
+//save
+const submitNewTransfer = () => {
+    const userConfirm = confirm("Are You Sure To Save ?");
+    if (userConfirm) {
+
+        let postServiceResponse = ajaxRequest('/trfr/save', 'POST', trfrObj)
+        if (postServiceResponse == "OK") {
+            alert('successfully saved');
+            $('#modalInternalTransfers').modal('hide');
+            formTransferFunds.reset();
+            refreshTransferForm();
+            window.location.reload();
+
+        } else {
+            alert("An error occured \n" + postServiceResponse);
+        }
+    } else {
+        alert("Operation cancelled by the Operator");
+    }
 }
 
 //======TRANSFER======

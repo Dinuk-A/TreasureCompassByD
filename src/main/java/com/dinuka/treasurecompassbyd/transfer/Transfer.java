@@ -1,7 +1,7 @@
 package com.dinuka.treasurecompassbyd.transfer;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.dinuka.treasurecompassbyd.Account.Account;
 
@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "trx")
+@Table(name = "transfer")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +36,7 @@ public class Transfer {
 
     @Column(name = "transfer_date")
     @NotNull
-    private LocalDateTime transfer_date;
+    private LocalDate transfer_date;
 
     @ManyToOne
     @JoinColumn(name = "source_account_id", referencedColumnName = "id")

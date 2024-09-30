@@ -14,7 +14,7 @@ public class TransferController {
     private TransferDao transferDao;
 
     // to save the trfr info
-    @PostMapping("/trfr/post")
+    @PostMapping("/trfr/save")
     public String saveTransferInfo(@RequestBody Transfer trfrEntity) {
 
         try {
