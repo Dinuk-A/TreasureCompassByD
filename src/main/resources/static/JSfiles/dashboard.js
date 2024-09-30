@@ -448,6 +448,15 @@ const refreshTransferForm = () => {
 
     let userID = loggedUserIdHiddenValueID.innerText;
     accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
+
+    let physicalWallet = {
+        acc_display_name: "Physical Wallet",
+        balance : loggedUserObject.cash_in_hand,
+        id : -10
+    }
+
+    accListByUser.unshift(physicalWallet);
+
     fillDataIntoSelect(selectSourceAcc, "Select Account", accListByUser, 'acc_display_name')
 }
 
@@ -492,21 +501,12 @@ const changesBasedOnSourceAcc = () => {
     console.log("inputTrfrAmount end");
 
     //others
-    inputTrxDate.disabled = false;
+    inputTrfrDate.disabled = false;
     inputTrfrDescription.disabled = false;
     
     console.log("end");
 
 }
-
-//cant exceed the current value of the source acc when transfering
-// const passMaxTrfrAmount = () => {
-//     let sourceSelectElement = document.getElementById('selectSourceAcc');
-
-//     let selectedSourceAcc = JSON.parse(sourceSelectElement.value);
-
-//     inputTrfrAmount.value = selectedSourceAcc.balance.toFixed(2);
-// }
 
 //validate the transfering amount
 const validateTrfrAmount = () => {
@@ -528,13 +528,7 @@ const validateTrfrAmount = () => {
         inputTrfrAmount.style.border = "2px solid lime";
     }
 
-
 }
-//     if (inputTrfrAmount.value = < selectedSourceAcc.balance) {
-// console.log("sad");
-//     // trfrObj.amount = inputTrfrAmount.value;
-
-
 
 //save
 const submitNewTransfer = () => {

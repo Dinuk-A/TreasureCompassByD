@@ -18,7 +18,6 @@ public class TransferController {
     public String saveTransferInfo(@RequestBody Transfer trfrEntity) {
 
         try {
-
             trfrEntity.setStatus(true);
             transferDao.save(trfrEntity);
             return "OK";
