@@ -51,8 +51,13 @@ public class Transfer {
     private Boolean status;
 
     @Column(name = "description")
-    @NotNull
     private String description;
+
+    @Column(name = "is_from_phy_wall")
+    private Boolean is_from_phy_wall;
+
+    @Column(name = "is_to_phy_wall")
+    private Boolean is_to_phy_wall;
 
 }
 
@@ -64,4 +69,6 @@ public class Transfer {
  * destination_account_id int
  * status tinyint
  * description text
+ * is_from_phy_wall tinyint
+ * is_to_phy_wall
  */

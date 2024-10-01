@@ -455,6 +455,7 @@ const refreshTransferForm = () => {
         id : -10
     }
 
+    //add new item to the start
     accListByUser.unshift(physicalWallet);
 
     fillDataIntoSelect(selectSourceAcc, "Select Account", accListByUser, 'acc_display_name')
@@ -469,9 +470,19 @@ const changesBasedOnSourceAcc = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     defaultAccListByUser = ajaxGetRequest("/account/byuserid/" + userID);
 
+    let physicalWallet = {
+        acc_display_name: "Physical Wallet",
+        balance : loggedUserObject.cash_in_hand,
+        id : -10
+    }
+
+    //add new item to the start
+    defaultAccListByUser.unshift(physicalWallet);
+
     let sourceSelectElement = document.getElementById('selectSourceAcc');
 
     let selectedSourceAcc = JSON.parse(sourceSelectElement.value);
+    console.log(selectedSourceAcc);
 
     //also working
     // let indexOfSelectedSourceAcc = defaultAccListByUser.map(acc => acc.acc_display_name).indexOf(selectedSourceAcc.acc_display_name);

@@ -36,7 +36,6 @@ public class Account {
     private String acc_display_name;
 
     @Column(name = "acc_number")
-    @NotNull
     private String acc_number;
 
     @Column(name = "balance")
@@ -48,7 +47,7 @@ public class Account {
     private Boolean status;
 
     // @Column(name = "user_id")
-    //  private Integer user_id;
+    // private Integer user_id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
