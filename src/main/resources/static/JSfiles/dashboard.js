@@ -99,7 +99,7 @@ const refreshAccCards = () => {
         const h2Balance = document.createElement('h2');
         h2Balance.className = "card-title text-success d-flex justify-content-center";
         const spanBalance = document.createElement('span');
-        spanBalance.innerText = account.balance;
+        spanBalance.innerText = account.balance.toFixed(2);
         const spanCurrency = document.createElement('span');
         spanCurrency.className = "ms-4 text-primary";
         spanCurrency.innerText = account.acc_currency_id.code;
@@ -304,7 +304,7 @@ const refreshTrxForm = () => {
 
 }
 
-// add new income record
+// add new trx record
 const submitNewTransaction = () => {
     const userConfirm = confirm("Are You Sure To Save ?");
     if (userConfirm) {
@@ -325,33 +325,62 @@ const submitNewTransaction = () => {
     }
 }
 
+//pass the current balance  when an account/wallet is selected 
+const passCurrentBalance = (elementId) => {
+
+    const expenseRadio = document.getElementById('expense');
+
+    if (expenseRadio.checked && toAccount.checked) {
+
+        inputTrxAmount.value = "";
+        transactionObj.amount = null;
+
+        let selectedAcc = JSON.parse(elementId.value);
+        let crntBalInAcc = selectedAcc.balance;
+        inputTrxAmount.value = crntBalInAcc.toFixed(2);
+    }
+    if (expenseRadio.checked && toWallet.checked) {
+
+        inputTrxAmount.value = "";
+        transactionObj.amount = null;
+        inputTrxAmount.value = (loggedUserObject.cash_in_hand).toFixed(2);
+    }
+
+}
+
 //changes depend on income/outcome
-const changeTrxCatList = () => {
+const changesBasedOnTrxType = () => {
 
     const incomeRadio = document.getElementById('income');
     const expenseRadio = document.getElementById('expense');
 
     if (incomeRadio.checked) {
+        transactionObj.trx_category_id = null;
 
-        const inputAmount = document.getElementById('inputTrxAmount');
-        inputAmount.disabled = false;
+        labelToOrFrom.innerText = "To :";
+
+        toWalletRadioLabel.innerText = "To Wallet";
+        toAccountRadioLabel.innerText = "To an Account";
 
         const incomeCatList = ajaxGetRequest("/trxcat/income");
         fillDataIntoSelect(selectTrxCategory, "Please Select", incomeCatList, 'name');
 
         transactionObj.trx_type = incomeRadio.value;
-        console.log(incomeRadio.value);
+
 
     } else if (expenseRadio.checked) {
+        transactionObj.trx_category_id = null;
 
-        const inputAmount = document.getElementById('inputTrxAmount');
-        inputAmount.disabled = false;
+        labelToOrFrom.innerText = "From :";
+
+        toWalletRadioLabel.innerText = "From Wallet";
+        toAccountRadioLabel.innerText = "From an Account";
 
         const expenseCatList = ajaxGetRequest("/trxcat/expense");
         fillDataIntoSelect(selectTrxCategory, "Please Select", expenseCatList, 'name');
 
         transactionObj.trx_type = expenseRadio.value;
-        console.log(expenseRadio.value);
+
     }
 }
 
@@ -369,6 +398,55 @@ const toggleAccountSelection = () => {
         accountSelectionId.classList.add('d-none');
         transactionObj.account_id = null;
         transactionObj.is_from_cashinhand = true;
+
+        passCurrentBalance();
+    }
+}
+
+//validate to prevent spending more than the max amount
+const validateTrxAmount = () => {
+
+    let trxAmount = parseFloat(inputTrxAmount.value);
+    let cashInhandBal = loggedUserObject.cash_in_hand;
+    const expenseRadio = document.getElementById('expense');
+
+    if (expenseRadio.checked && toAccount.checked) {
+
+        let selectedAcc = JSON.parse(selectTrxAccount.value);
+        let crntBalInAcc = selectedAcc.balance;
+
+        if (trxAmount > crntBalInAcc) {
+
+            console.log("Transfer amount exceeds the account balance");
+            transactionObj.amount = null;
+            inputTrxAmount.style.border = "2px solid red";
+            console.log(transactionObj.amount);
+
+        } else {
+
+            transactionObj.amount = inputTrxAmount.value;
+            inputTrxAmount.style.border = "2px solid lime";
+            console.log(transactionObj.amount);
+
+        }
+
+
+    } else if (expenseRadio.checked && toWallet.checked) {
+
+        if (trxAmount > cashInhandBal) {
+
+            inputTrxAmount.style.border = "2px solid red";
+            transactionObj.amount = null;
+            console.log("Transfer amount exceeds the cash in hand balance");
+            console.log(transactionObj.amount);
+
+        } else {
+
+            transactionObj.amount = inputTrxAmount.value;
+            inputTrxAmount.style.border = "2px solid lime";
+            console.log(transactionObj.amount);
+
+        }
     }
 }
 
@@ -395,6 +473,14 @@ const displayTrxList = () => {
             classes = "col-3 text-danger fw-bold text-end";
         }
 
+        //for differentiate records that doesnt have an account id
+        let accDisplayName;
+        if (!trx.is_from_cashinhand) {
+            accDisplayName = trx.account_id.acc_display_name;
+        } else {
+            accDisplayName = "Cash In Hand";
+        }
+
         //main row
         const row = document.createElement('div');
         row.className = "row mx-auto mb-1 border-bottom border-success";
@@ -412,7 +498,7 @@ const displayTrxList = () => {
         //account/cash col-3
         const account = document.createElement('div');
         account.classList.add('col-3')
-        account.textContent = `${toOrFrom} : ${trx.account_id.acc_display_name}`;
+        account.textContent = `${toOrFrom} : ${accDisplayName}`;
 
         //space col-1
         const emptySpace = document.createElement('div');
@@ -423,17 +509,14 @@ const displayTrxList = () => {
         amountDiv.className = classes;
         amountDiv.textContent = `${plusOrMinus} ${parseFloat(trx.amount).toFixed(2)}`;
 
-
-        // amountDiv.innerText = trx.amount;
-
         row.appendChild(date);
         row.appendChild(category);
         row.appendChild(account);
         row.appendChild(emptySpace);
         row.appendChild(amountDiv);
 
-
         trxListDisplayContainer.appendChild(row);
+
     })
 }
 
@@ -451,8 +534,8 @@ const refreshTransferForm = () => {
 
     let physicalWallet = {
         acc_display_name: "Physical Wallet",
-        balance : loggedUserObject.cash_in_hand,
-        id : -10
+        balance: loggedUserObject.cash_in_hand,
+        id: -10
     }
 
     //add new item to the start
@@ -472,8 +555,8 @@ const changesBasedOnSourceAcc = () => {
 
     let physicalWallet = {
         acc_display_name: "Physical Wallet",
-        balance : loggedUserObject.cash_in_hand,
-        id : -10
+        balance: loggedUserObject.cash_in_hand,
+        id: -10
     }
 
     //add new item to the start
@@ -514,7 +597,7 @@ const changesBasedOnSourceAcc = () => {
     //others
     inputTrfrDate.disabled = false;
     inputTrfrDescription.disabled = false;
-    
+
     console.log("end");
 
 }
@@ -526,12 +609,12 @@ const validateTrfrAmount = () => {
     let transferAmount = parseFloat(inputTrfrAmount.value);
 
     if (transferAmount > selectedSourceAcc.balance) {
-        alert("Transfer amount exceeds the account balance");
+        console.log("Transfer amount exceeds the account balance");
         trfrObj.amount = null;
         inputTrfrAmount.style.border = "2px solid red";
     }
     else if (transferAmount <= 0) {
-        alert("Invalid amount: must be greater than zero");
+        console.log("Invalid amount: must be greater than zero");
         trfrObj.amount = null;
         inputTrfrAmount.style.border = "2px solid red";
     } else {

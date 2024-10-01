@@ -1,5 +1,6 @@
 package com.dinuka.treasurecompassbyd.transaction;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dinuka.treasurecompassbyd.Account.Account;
+import com.dinuka.treasurecompassbyd.Account.AccountDao;
 import com.dinuka.treasurecompassbyd.user.User;
 import com.dinuka.treasurecompassbyd.user.UserDao;
 
@@ -25,30 +28,84 @@ public class MainTrxController {
     @Autowired
     private UserDao uDao;
 
+    @Autowired
+    private AccountDao accDao;
+
     // get all the trxs by user
     @GetMapping(value = "/trx/byuser/{userId}", produces = "application/json")
-    public List<MainTrx> getAllTrxByUser(@PathVariable("userId") int userId){
+    public List<MainTrx> getAllTrxByUser(@PathVariable("userId") int userId) {
         return mainTrxDao.getTrxListByuser(userId);
     }
 
-    // to save the trx info
     @PostMapping("/trx/save")
     public String saveTransactionInfo(@RequestBody MainTrx trxEntity) {
-
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
             User loggedUser = uDao.getByUName(auth.getName());
-
             trxEntity.setUser_id(loggedUser.getId());
+    
+            // Retrieve current cash in hand balance
+            BigDecimal currentCashInHandBal = loggedUser.getCash_in_hand();
+    
+            // 1. Handling EXPENSE transactions
+            if ("EXPENSE".equals(trxEntity.getTrx_type())) {
+    
+                // Deduct from an account if specified
+                if (trxEntity.getAccount_id() != null) {
+                    Account targetedAcc = trxEntity.getAccount_id();
+                    BigDecimal currentAccBalance = targetedAcc.getBalance();
+    
+                    // Deduct the amount from the account balance
+                    targetedAcc.setBalance(currentAccBalance.subtract(trxEntity.getAmount()));
+    
+                    // Save the updated account balance
+                    accDao.save(targetedAcc);
+                }
+    
+                // Deduct from cash in hand if flagged
+                if (trxEntity.getIs_from_cashinhand()) {
+                    loggedUser.setCash_in_hand(currentCashInHandBal.subtract(trxEntity.getAmount()));
+                    
+                    // Save the updated user cash in hand balance
+                    uDao.save(loggedUser);
+                }
+            }
+    
+            // 2. Handling INCOME transactions
+            if ("INCOME".equals(trxEntity.getTrx_type())) {
+    
+                // Add to an account if specified
+                if (trxEntity.getAccount_id() != null) {
+                    Account targetedAcc = trxEntity.getAccount_id();
+                    BigDecimal currentAccBalance = targetedAcc.getBalance();
+    
+                    // Add the amount to the account balance
+                    targetedAcc.setBalance(currentAccBalance.add(trxEntity.getAmount()));
+    
+                    // Save the updated account balance
+                    accDao.save(targetedAcc);
+                }
+    
+                // Add to cash in hand if flagged
+                if (trxEntity.getIs_from_cashinhand()) {
+                    loggedUser.setCash_in_hand(currentCashInHandBal.add(trxEntity.getAmount()));
+    
+                    // Save the updated user cash in hand balance
+                    uDao.save(loggedUser);
+                }
+            }
+    
+            // Set the transaction status to true and save the transaction
             trxEntity.setStatus(true);
             mainTrxDao.save(trxEntity);
+    
             return "OK";
+    
         } catch (Exception e) {
-            return "Save Not Completed Because :" + e.getMessage();
+            return "Save Not Completed Because: " + e.getMessage();
         }
-
     }
+    
 
     // to update trx info
     @PutMapping("/trx/update")

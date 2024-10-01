@@ -286,7 +286,7 @@
         </div>
     </div>
 
-    <!-- modal for add new income record ✅-->
+    <!-- modal for add new transaction record ✅-->
     <div id="modalAddNewTrxRec" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-md">
             <div class="modal-content border-warning">
@@ -312,15 +312,48 @@
                             <div class="col-7">
                                 <div>
                                     <input type="radio" class="btn-check" name="trxMaintype" id="income"
-                                        autocomplete="off" onclick="changeTrxCatList()" value="INCOME">
+                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="INCOME">
 
                                     <label class="btn btn-outline-success" for="income">INCOME</label>
 
                                     <input type="radio" class="btn-check" name="trxMaintype" id="expense"
-                                        autocomplete="off" onclick="changeTrxCatList()" value="EXPENSE">
+                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="EXPENSE">
 
                                     <label class="btn btn-outline-danger" for="expense">EXPENSE</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- To or From-->
+                        <div class="row mt-2">
+                            <div class="col-5">
+                                <label id="labelToOrFrom" class="form-label fw-bold"> To :</label>
+                            </div>
+                            <div class="col-7">
+                                <div>
+                                    <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
+                                        autocomplete="off" onclick="toggleAccountSelection()">
+                                    <label class="btn btn-outline-success" for="toWallet" id="toWalletRadioLabel">To
+                                        Wallet</label>
+
+                                    <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
+                                        autocomplete="off" onclick="toggleAccountSelection()">
+                                    <label class="btn btn-outline-danger" for="toAccount" id="toAccountRadioLabel">To an 
+                                        Account</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Selection -->
+                        <div class="row mt-2 d-none" id="accountSelection">
+                            <div class="col-5">
+                                <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
+                            </div>
+                            <div class="col-7">
+                                <select id="selectTrxAccount" class="form-select"
+                                    onchange="selectDynamicVal(this,'','transactionObj','account_id'); passCurrentBalance(this);">
+
+                                </select>
                             </div>
                         </div>
 
@@ -331,7 +364,7 @@
                             </div>
                             <div class="col-7">
                                 <input id="inputTrxAmount" type="number" class="form-control" step="0.01" min="0"
-                                    required onkeyup="inputFieldValidator(this,'','transactionObj','amount')" disabled>
+                                    required onkeyup="validateTrxAmount();">
                             </div>
                         </div>
 
@@ -344,37 +377,6 @@
                                 <input id="inputTrxDate" type="date" class="form-control" required
                                     onchange="inputFieldValidator(this,'','transactionObj','trx_date')"
                                     onkeydown="return false">
-                            </div>
-                        </div>
-
-                        <!-- To -->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label class="form-label fw-bold"> To :</label>
-                            </div>
-                            <div class="col-7">
-                                <div>
-                                    <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
-                                        autocomplete="off" onclick="toggleAccountSelection()">
-                                    <label class="btn btn-outline-success" for="toWallet">To Wallet</label>
-
-                                    <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
-                                        autocomplete="off" onclick="toggleAccountSelection()">
-                                    <label class="btn btn-outline-danger" for="toAccount">To Account</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Account Selection -->
-                        <div class="row mt-2 d-none" id="accountSelection">
-                            <div class="col-5">
-                                <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
-                            </div>
-                            <div class="col-7">
-                                <select id="selectTrxAccount" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','account_id')">
-
-                                </select>
                             </div>
                         </div>
 
@@ -443,7 +445,8 @@
                                 <label for="selecttSourceAcc" class="form-lable fw-bold"> Source Account :</label>
 
                                 <select id="selectSourceAcc" class="form-select"
-                                    onchange="selectDynamicVal(this,'','trfrObj','source_account_id'); changesBasedOnSourceAcc(); " required>
+                                    onchange="selectDynamicVal(this,'','trfrObj','source_account_id'); changesBasedOnSourceAcc(); "
+                                    required>
                                 </select>
                             </div>
 
