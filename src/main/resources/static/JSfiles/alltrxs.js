@@ -1,11 +1,133 @@
-window.addEventListener('load', ()=>{
+window.addEventListener('load', () => {
 
     displayTrxs();
 
 });
 
-//get all the trxs
-const displayTrxs =()=>{
+let selectedTransaction, previouslySelectedRow;
+
+const displayTrxs = () => {
+    let userID = loggedUserIdHiddenValueID.innerText;
+    let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
+
+    $('#allTrxListDisplayContainer').empty();
+
+    allTrxListByUser.forEach((trx, index) => {
+
+        let toOrFrom, plusOrMinus, classes;
+
+        if (trx.trx_type == "INCOME") {
+            toOrFrom = "To";
+            plusOrMinus = "+ ";
+            classes = " fw-bold";
+        } else {
+            toOrFrom = "From";
+            plusOrMinus = "- ";
+            classes = "text-danger fw-bold";
+        }
+
+        let accDisplayName = trx.is_from_cashinhand ? "Cash In Hand" : trx.account_id.acc_display_name;
+
+        // Create table row
+        const row = document.createElement('tr');
+
+        row.onclick = function () {
+            if (previouslySelectedRow) {
+                previouslySelectedRow.classList.remove('highlight');
+            }
+            row.classList.add('highlight');
+            previouslySelectedRow = row;
+
+            selectedTransaction = trx;
+            editTrxButton.style.visibility = "visible";
+            console.log(trx.amount);
+        }
+
+
+        // Date cell
+        const dateCell = document.createElement('td');
+        dateCell.innerText = trx.trx_date;
+
+        // Category cell
+        const categoryCell = document.createElement('td');
+        categoryCell.innerText = trx.trx_category_id.name;
+
+        // Account cell
+        const accountCell = document.createElement('td');
+        accountCell.innerText = `${toOrFrom} : ${accDisplayName}`;
+
+        // Amount cell
+        const amountCell = document.createElement('td');
+        amountCell.className = classes;
+        if (trx.trx_type == "INCOME") {
+            amountCell.style.color = "lime";
+        }
+        amountCell.innerText = `${plusOrMinus} ${parseFloat(trx.amount).toFixed(2)}`;
+
+        // Append cells to the row
+        row.appendChild(dateCell);
+        row.appendChild(categoryCell);
+        row.appendChild(accountCell);
+        row.appendChild(amountCell);
+
+        document.getElementById('allTrxListDisplayContainer').appendChild(row);
+    });
+
+
+    $('#allTrxTable').DataTable({
+        destroy: true, // Allows re-initialization
+        paging: true,  // Enable pagination
+        searching: false, // Remove the search bar
+        info: false, // Show entries count
+        pageLength: 10, // Number of rows per page
+        lengthChange: false // Disable ability to change the number of rows
+    });
+
+    // click event to Edit button
+    const editButton = document.getElementById("editTrxButton");
+    editButton.addEventListener('click', () => {
+        openEditModal();
+    });
+}
+
+//fn for edit button
+const openEditModal = () => {
+    console.log("Edit modal opening...");
+
+    // Populate the modal fields with the selected transaction data
+    document.getElementById("inputTrxAmount").value = parseFloat(selectedTransaction.amount).toFixed(2);
+    document.getElementById("inputTrxDate").value = selectedTransaction.trx_date;
+    document.getElementById("inputTrxDescription").value = selectedTransaction.description || "";
+
+    // Set radio buttons based on transaction type
+    if (selectedTransaction.trx_type === "INCOME") {
+        document.getElementById("income").checked = true;
+        document.getElementById("toWallet").disabled = false;
+        document.getElementById("toAccount").disabled = false;
+    } else {
+        document.getElementById("expense").checked = true;
+        document.getElementById("toWallet").disabled = false;
+        document.getElementById("toAccount").disabled = false;
+    }
+
+    // Set destination radio buttons
+    if (selectedTransaction.is_from_cashinhand) {
+        document.getElementById("toWallet").checked = true;
+        document.getElementById("accountSelection").style.display = 'none';
+    } else {
+        document.getElementById("toAccount").checked = true;
+        document.getElementById("accountSelection").style.display = 'block';
+        // Populate the account selection dropdown based on the selected transaction
+        document.getElementById("selectTrxAccount").value = selectedTransaction.account_id.id; // Assuming account_id contains the selected account's id
+    }
+
+    // Show the modal
+    $('#modalUpdateTrxRec').modal('show');
+}
+
+
+//original
+const displayTrxsOri = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
 
@@ -72,4 +194,31 @@ const displayTrxs =()=>{
 
 
 }
+
+// $('#allTrxListDisplayContainer').on('click', 'tr', function () {
+//     // Use DataTable to get the row node
+//     const rowNode = $(this);
+
+//     // Remove highlight from previously selected row
+//     if (previouslySelectedRow) {
+//         previouslySelectedRow.removeClass('highlight');
+//     }
+
+//     // Add highlight to the current row
+//     rowNode.addClass('highlight');
+//     previouslySelectedRow = rowNode; // Update the reference to the currently selected row
+
+//     selectedTransaction = allTrxListByUser[rowNode.index()]; // Adjust this line to get the correct transaction
+//     editTrxButton.style.visibility = "visible"; // Show the edit button
+//     console.log(selectedTransaction.amount);
+// });
+
+// row.onclick = function () {
+//     row.style.backgroundColor = "green";
+//     selectedTransaction = trx;
+//     editTrxButton.style.visibility = "visible";
+//     console.log(trx.amount);
+// }
+
+
 

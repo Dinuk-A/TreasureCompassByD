@@ -157,7 +157,6 @@ const fillDataIntoTable2 = (tableID, dataList, columnsList, editFunction, delete
 
 }
 
-
 //create function fill data into table -- with radio ✅✅✅
 const fillDataIntoTable3 = (tableID, dataList, columnsList, buttonVisibility = true, disableButtonsCommonFn) => {
 
@@ -256,124 +255,6 @@ const fillDataIntoTable3 = (tableID, dataList, columnsList, buttonVisibility = t
     });
 
 }
-
-// const fillDataIntoTable3 = (tableId, dataList, columnList, buttonVisibility = true) => {
-
-
-//     //const table = document.querySelector('#tableEmployee');
-//     const tableBody = tableId.children[1];
-//     tableBody.innerHTML = '';
-
-//     dataList.forEach((element, index) => {
-
-//         const tr = document.createElement('tr');
-
-//         const tdIndex = document.createElement('td');
-//         tdIndex.innerText = index + 1;
-//         tr.appendChild(tdIndex);
-
-//         columnList.forEach(column => {
-//             const td = document.createElement('td');
-
-//             if (column.dataType == 'text') {
-//                 td.innerText = element[column.propertyName];
-//             }
-//             if (column.dataType == 'function') {
-//                 td.innerHTML = column.propertyName(element);
-//             }
-
-//             tr.appendChild(td);
-//         });
-
-//         const tdButton = document.createElement('td');
-//         tdButton.className='text-center';
-
-//         const inputRadio = document.createElement('input');
-//         inputRadio.className = 'form-check-input-mt-3';
-//         inputRadio.name= 'modify'
-//         inputRadio.type = 'radio';
-
-//         tr.onchange = function(){
-//             window['editOb'] = element;
-//             window['editRow'] = index;
-//             divModify.className = 'd-block';
-//         }
-
-//         tdButton.appendChild(inputRadio);
-
-//           /* const tdIndex = document.createElement('td');
-//         const tdCallingName = document.createElement('td');
-//         const tdFullName = document.createElement('td');
-//         const tdNic = document.createElement('td');
-//         const tdMobile = document.createElement('td');
-//         const tdStatus = document.createElement('td');
-//         const tdModify = document.createElement('td');
-//         */
-//  /*        const tdButton = document.createElement('td');
-
-//         const buttonEdit = document.createElement('button');
-//         const buttonDelete = document.createElement('button');
-//         const buttonPrint = document.createElement('button');
-
-//         buttonEdit.className = 'btn', 'custom-btn', 'bg-warning';
-//         buttonDelete.className = 'btn', 'custom-btn', 'bg-danger', 'ms-2';
-//         buttonPrint.className = 'btn', 'custom-btn', 'bg-success', 'ms-2';
-
-//         buttonEdit.innerHTML = '<i class = "fa-solid fa-pen-to-square fa-beat"></i>';
-//         buttonDelete.innerHTML = '<i class = "fa-solid fa-trash fa-beat"></i>';
-//         buttonPrint.innerHTML = '<i class = "fa-solid fa-eye fa-beat"></i>';
-
-//         buttonEdit.onclick = function () {
-//             editfunction(element, index);
-//         }
-
-//         buttonDelete.onclick = function () {
-//             //conform ('are you sure to delete following employee')
-//             deleteFuction(element, index);
-//         }
-
-//         buttonPrint.onclick = function () {
-//             printFunction(element, index);
-//         }
-
-//         tdButton.appendChild(buttonEdit);
-//         tdButton.appendChild(buttonDelete);
-//         tdButton.appendChild(buttonPrint); */
-
-//         if (buttonVisibility){
-//             tr.appendChild(tdButton);
-//         }
-
-//         tableBody.appendChild(tr);
-
-
-//         /*   tdIndex.innerText = index+1;
-//           tdCallingName.innerText= element.callingName;
-//           tdFullName.innerText=element.fullName;
-//           tdNic.innerText = element.nic;
-//           tdMobile.innerText= element.mobile;
-
-
-//           tdStatus.innerText = element.employeestatus_id.name; */
-
-//         /*   tr.appendChild(tdIndex);        
-//           tr.appendChild(tdCallingName);        
-//           tr.appendChild(tdFullName);        
-//           tr.appendChild(tdNic);        
-//           tr.appendChild(tdMobile);        
-//           tr.appendChild(tdStatus);  
-//           tr.appendChild(tdModify);  */
-
-//     });
-// }
-
-
-
-
-
-
-
-//create function fill data into table - - row onclick
 
 const fillDataIntoTable4 = (tableID, dataList, columnsList, buttonVisibility = true) => {
 
