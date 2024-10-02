@@ -5,17 +5,16 @@ window.addEventListener('load', () => {
     window['loggedUserObject'] = ajaxGetRequest("/user/byid/" + userID);
 
     refreshAccCards();
-    refreshAddAccForm();
-    refreshCashInHandEditForm();
-    refreshTrxForm();
     displayTrxList();
-    refreshTransferForm();
+
 
 });
 
 // ======CASH IN HAND=======
 //for thr cash in hand edit form
-const refreshCashInHandEditForm = () => {
+const openCashInHandEditForm = () => {
+
+    $('#modalEditCashInHand').modal('show');
 
     currs = ajaxGetRequest("currency/all");
     fillDataIntoSelect(selectBaseCurrency, "Select Currency", currs, 'code');
@@ -116,7 +115,7 @@ const refreshAccCards = () => {
         buttonDiv.className = "mt-2 d-flex justify-content-end";
 
         const button = document.createElement('button');
-        button.className = "btn btn-danger";
+        button.className = "btn btn-info me-1";
         button.type = "button";
         button.innerText = "Edit Amount";
         button.onclick = function () {
@@ -125,7 +124,7 @@ const refreshAccCards = () => {
 
 
         const dltBtn = document.createElement('button');
-        dltBtn.className = "btn btn-primary";
+        dltBtn.className = "btn btn-danger";
         dltBtn.type = "button";
         dltBtn.innerText = "Delete";
         dltBtn.onclick = function () {
@@ -167,11 +166,6 @@ const refreshAccCards = () => {
         const cardBody = document.createElement('div');
         cardBody.className = "card-body";
 
-        // const h2Title = document.createElement('h2');
-        // h2Title.className = "card-title";
-        // h2Title.innerText = "Your Account Balance";
-        // cardBody.appendChild(h2Title);
-
         const pDescription = document.createElement('p');
         pDescription.className = "card-text mt-2 mb-0";
         pDescription.innerText = "To Manage Your Other Assets And Transactions From Them";
@@ -184,10 +178,14 @@ const refreshAccCards = () => {
         button.className = "btn btn-primary";
         button.type = "button";
         button.innerText = "Add New Account";
-        button.setAttribute("data-bs-toggle", "modal");
-        button.setAttribute("data-bs-target", "#modalAddNewAccount");
+        button.onclick = function () {
+            openAddNewAccForm();
+        };
+        // button.setAttribute("data-bs-toggle", "modal");
+        // button.setAttribute("data-bs-target", "#modalAddNewAccount");
         buttonDiv.appendChild(button);
         cardBody.appendChild(buttonDiv);
+        // openAddNewAccForm
 
         // Append card body to cardDiv
         cardDiv.appendChild(cardBody);
@@ -201,7 +199,9 @@ const refreshAccCards = () => {
 };
 
 //refresh new account form
-const refreshAddAccForm = () => {
+const openAddNewAccForm = () => {
+
+    $('#modalAddNewAccount').modal('show');
 
     currs = ajaxGetRequest("currency/all");
     fillDataIntoSelect(selectAccCurrency, "Select Currency", currs, 'code');
@@ -231,7 +231,7 @@ const submitNewAccount = () => {
     }
 };
 
-//refill acc details
+//refill acc details to edit
 const refillAccountInfo = (obj) => {
 
     accountObj = JSON.parse(JSON.stringify(obj));
@@ -242,7 +242,7 @@ const refillAccountInfo = (obj) => {
     inputAccNumber.value = accountObj.acc_number;
 
     acctypes = ajaxGetRequest("acctype/all");
-    fillDataIntoSelect(selectAccType, "Select Account Type", acctypes, 'name', accountObj.acc_display_name);
+    fillDataIntoSelect(selectAccType, "Select Account Type", acctypes, 'name', accountObj.acc_type_id.name);
 
     inputAccBalance.value = accountObj.balance.toFixed(2);
 
@@ -293,7 +293,9 @@ const deleteAccount = (ob) => {
 
 // ======TRX RECORDS=======
 //setting the form
-const refreshTrxForm = () => {
+const openTrxForm = () => {
+
+    $('#modalAddNewTrxRec').modal('show');
 
     transactionObj = new Object;
 
@@ -301,6 +303,11 @@ const refreshTrxForm = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
     fillDataIntoSelect(selectTrxAccount, "Select Account", accListByUser, 'acc_display_name')
+
+    const trxDateInput = document.getElementById('inputTrxDate');
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    trxDateInput.setAttribute('max', formattedDate);
 
 }
 
@@ -326,6 +333,7 @@ const submitNewTransaction = () => {
 }
 
 //pass the current balance  when an account/wallet is selected 
+//will be called in toggleAccountSelection()
 const passCurrentBalance = (elementId) => {
 
     const expenseRadio = document.getElementById('expense');
@@ -355,6 +363,12 @@ const changesBasedOnTrxType = () => {
     const expenseRadio = document.getElementById('expense');
 
     if (incomeRadio.checked) {
+
+        //clear out any previous values given if changes
+        inputTrxAmount.value = "";
+        inputTrxAmount.style.border = "2px solid #ced4da";
+        transactionObj.amount = null;
+
         transactionObj.trx_category_id = null;
 
         labelToOrFrom.innerText = "To :";
@@ -367,9 +381,23 @@ const changesBasedOnTrxType = () => {
 
         transactionObj.trx_type = incomeRadio.value;
 
+        //enable all disabled input elements
+        toWallet.disabled = false;
+        toAccount.disabled = false;
+        // selectTrxAccount.disabled = false;
+        inputTrxAmount.disabled = false;
+        inputTrxDate.disabled = false;
+        selectTrxCategory.disabled = false;
+        inputTrxDescription.disabled = false;
+
 
     } else if (expenseRadio.checked) {
+         //clear out any previous values given if changes
+         inputTrxAmount.value = "";
+         inputTrxAmount.style.border = "2px solid #ced4da";
+
         transactionObj.trx_category_id = null;
+        transactionObj.amount = null;
 
         labelToOrFrom.innerText = "From :";
 
@@ -381,6 +409,15 @@ const changesBasedOnTrxType = () => {
 
         transactionObj.trx_type = expenseRadio.value;
 
+        //enable all disabled input elements
+        toWallet.disabled = false;
+        toAccount.disabled = false;
+        // selectTrxAccount.disabled = false;
+        inputTrxAmount.disabled = false;
+        inputTrxDate.disabled = false;
+        selectTrxCategory.disabled = false;
+        inputTrxDescription.disabled = false;
+
     }
 }
 
@@ -391,12 +428,24 @@ const toggleAccountSelection = () => {
     const toAccountopt = document.getElementById('toAccount');
 
     if (toAccountopt.checked) {
+        //clear any previous selections
+        selectTrxAccount.value = "";
+        inputTrxAmount.value = "";
+        selectTrxAccount.style.border = "2px solid #ced4da";
+        inputTrxAmount.style.border = "2px solid #ced4da";
         accountSelectionId.classList.remove('d-none');
+
+        //for backend
         transactionObj.is_from_cashinhand = false;
 
     } else {
+        //clear any previous selections
         accountSelectionId.classList.add('d-none');
         transactionObj.account_id = null;
+        transactionObj.amount = null;
+        inputTrxAmount.style.border = "2px solid #ced4da";
+
+        //for backend
         transactionObj.is_from_cashinhand = true;
 
         passCurrentBalance();
@@ -525,7 +574,9 @@ const displayTrxList = () => {
 
 //======TRANSFER======
 //get data to selects
-const refreshTransferForm = () => {
+const openTransferForm = () => {
+
+    $('#modalInternalTransfers').modal('show');
 
     trfrObj = new Object;
 
@@ -542,6 +593,12 @@ const refreshTransferForm = () => {
     accListByUser.unshift(physicalWallet);
 
     fillDataIntoSelect(selectSourceAcc, "Select Account", accListByUser, 'acc_display_name')
+
+    const trfrDateInput = document.getElementById('inputTrfrDate');
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    trfrDateInput.setAttribute('max', formattedDate);
+
 }
 
 //change destination acc list without the source acc

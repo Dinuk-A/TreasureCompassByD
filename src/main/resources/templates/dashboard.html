@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <!-- row 2 -->
+    <!-- row 2 display 5 recent trxs ✅ and quick buttons ✅-->
     <div class="row mt-4 mx-auto mb-5">
 
         <div class="col-8">
@@ -112,14 +112,14 @@
             </div>
         </div>
 
-        <!-- quick buttons -->
+        <!-- quick buttons ✅-->
         <div class="col-4">
             <h4 class="text-primary mb-2 text-center">Quick Actions</h4>
             <div class="d-flex flex-column">
-                <button class="btn btn-success btn-lg mb-3" onclick="$('#modalAddNewTrxRec').modal('show');">Add New
+                <button class="btn btn-success btn-lg mb-3" onclick="openTrxForm();">Add New
                     Transaction</button>
 
-                <button class="btn btn-info btn-lg" onclick="$('#modalInternalTransfers').modal('show');">Transfer
+                <button class="btn btn-info btn-lg" onclick="openTransferForm();">Transfer
                     Funds</button>
             </div>
         </div>
@@ -305,7 +305,23 @@
                     <form id="formAddNewTransaction" onsubmit="return false">
 
                         <!-- type -->
-                        <div class="row mt-2">
+                        <div class="row mb-3 d-flex justify-content-center">
+
+                            <div class="col-12 text-center">
+                                <div>
+                                    <input type="radio" class="btn-check" name="trxMaintype" id="income"
+                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="INCOME">
+
+                                    <label class="btn btn-lg btn-outline-success" for="income">INCOME</label>
+
+                                    <input type="radio" class="btn-check" name="trxMaintype" id="expense"
+                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="EXPENSE">
+
+                                    <label class="btn btn-lg btn-outline-danger" for="expense">EXPENSE</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="row mt-2">
                             <div class="col-5">
                                 <label class="form-label fw-bold"> Type :</label>
                             </div>
@@ -322,7 +338,7 @@
                                     <label class="btn btn-outline-danger" for="expense">EXPENSE</label>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- To or From-->
                         <div class="row mt-2">
@@ -332,13 +348,14 @@
                             <div class="col-7">
                                 <div>
                                     <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
-                                        autocomplete="off" onclick="toggleAccountSelection()">
-                                    <label class="btn btn-outline-success" for="toWallet" id="toWalletRadioLabel">To
+                                        autocomplete="off" onclick="toggleAccountSelection()" disabled>
+                                    <label class="btn btn-outline-primary" for="toWallet" id="toWalletRadioLabel">To
                                         Wallet</label>
 
                                     <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
-                                        autocomplete="off" onclick="toggleAccountSelection()">
-                                    <label class="btn btn-outline-danger" for="toAccount" id="toAccountRadioLabel">To an 
+                                        autocomplete="off"
+                                        onclick="toggleAccountSelection(); selectTrxAccount.disabled = false;" disabled>
+                                    <label class="btn btn-outline-warning" for="toAccount" id="toAccountRadioLabel">To an
                                         Account</label>
                                 </div>
                             </div>
@@ -351,7 +368,8 @@
                             </div>
                             <div class="col-7">
                                 <select id="selectTrxAccount" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','account_id'); passCurrentBalance(this);">
+                                    onchange="selectDynamicVal(this,'','transactionObj','account_id'); passCurrentBalance(this); inputTrxAmount.style.border = '2px solid #ced4da'; "
+                                    disabled>
 
                                 </select>
                             </div>
@@ -364,7 +382,7 @@
                             </div>
                             <div class="col-7">
                                 <input id="inputTrxAmount" type="number" class="form-control" step="0.01" min="0"
-                                    required onkeyup="validateTrxAmount();">
+                                    required onkeyup="validateTrxAmount();" disabled>
                             </div>
                         </div>
 
@@ -376,7 +394,7 @@
                             <div class="col-7">
                                 <input id="inputTrxDate" type="date" class="form-control" required
                                     onchange="inputFieldValidator(this,'','transactionObj','trx_date')"
-                                    onkeydown="return false">
+                                    onkeydown="return false" disabled>
                             </div>
                         </div>
 
@@ -388,7 +406,8 @@
                             </div>
                             <div class="col-7">
                                 <select id="selectTrxCategory" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required>
+                                    onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required
+                                    disabled>
 
                                 </select>
                             </div>
@@ -401,7 +420,8 @@
                             </div>
                             <div class="col-7">
                                 <textarea id="inputTrxDescription" class="form-control" rows="2"
-                                    onkeyup="inputFieldValidator(this,'','transactionObj','description')"></textarea>
+                                    onkeyup="inputFieldValidator(this,'','transactionObj','description')"
+                                    disabled></textarea>
                             </div>
                         </div>
 
@@ -410,16 +430,18 @@
 
                 <!-- modal footer -->
                 <div class="modal-footer py-0">
-                    <button type="reset" class="btn btn-secondary me-2">Clear</button>
+                    <button type="reset" class="btn btn-danger me-2">Clear</button>
 
-                    <button type="button" class="btn btn-primary" onclick="submitNewTransaction();">Save</button>
+                    <button type="button" class="btn btn-primary" onclick="editTransaction();">Update</button>
+
+                    <button type="button" class="btn btn-success" onclick="submitNewTransaction();">Save</button>
 
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- modal for add internal transfers  -->
+    <!-- modal for add internal transfers  ✅-->
     <div id="modalInternalTransfers" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-md ">
             <div class="modal-content border-warning">
@@ -505,9 +527,9 @@
                 <div class="modal-footer py-0">
                     <button type="reset" class="btn btn-danger">Clear</button>
 
-                    <button type="button" class="btn btn-warning" onclick="updateTransfer();" disabled>Update</button>
+                    <button type="button" class="btn btn-primary" onclick="updateTransfer();" disabled>Update</button>
 
-                    <button type="button" class="btn btn-primary" onclick="submitNewTransfer();">Save</button>
+                    <button type="button" class="btn btn-success" onclick="submitNewTransfer();">Save</button>
 
                 </div>
             </div>

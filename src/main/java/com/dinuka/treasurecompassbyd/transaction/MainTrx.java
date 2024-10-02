@@ -27,48 +27,46 @@ import lombok.NoArgsConstructor;
 
 public class MainTrx {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Integer id;
 
-    @Column(name = "amount")
-    @NotNull
-    private BigDecimal amount;
+  @Column(name = "amount")
+  @NotNull
+  private BigDecimal amount;
 
-    @Column(name = "trx_date")
-    @NotNull
-    private LocalDate trx_date;
+  @Column(name = "trx_date")
+  @NotNull
+  private LocalDate trx_date;
 
-    @Column(name = "description")
-    @NotNull
-    private String description;
+  @Column(name = "description")
+  private String description;
 
-    @Column(name = "trx_type")
-    @NotNull
-    private String trx_type;
+  @Column(name = "trx_type")
+  @NotNull
+  private String trx_type;
 
-    @Column(name = "status")
-    @NotNull
-    private Boolean status;
+  @Column(name = "status")
+  @NotNull
+  private Boolean status;
 
-    // @ManyToOne
-    // @JoinColumn(name = "user_id", referencedColumnName = "id")
-    // private User user_id;
+  // @ManyToOne
+  // @JoinColumn(name = "user_id", referencedColumnName = "id")
+  // private User user_id;
 
-    @Column(name = "user_id")
+  @Column(name = "user_id")
   private Integer user_id;
-    
-    @ManyToOne
-    @JoinColumn(name = "trx_category_id", referencedColumnName = "id")
-    private TrxCategory trx_category_id;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "id")
-    private Account account_id;
+  @ManyToOne
+  @JoinColumn(name = "trx_category_id", referencedColumnName = "id")
+  private TrxCategory trx_category_id;
 
-    @Column(name = "is_from_cashinhand")
-    private Boolean is_from_cashinhand;
+  @ManyToOne
+  @JoinColumn(name = "account_id", referencedColumnName = "id")
+  private Account account_id;
+
+  @Column(name = "is_from_cashinhand")
+  private Boolean is_from_cashinhand;
 
 }
-
