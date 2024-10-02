@@ -9,6 +9,33 @@
 </head>
 
 <body>
+    <!-- greeting section ✅-->
+    <div class="row mt-4 bg-warning">
+        <h1 class="text-center text-success">Welcome <span class="text-primary" th:text="${loggedusername}"></span> ...
+        </h1>
+    </div>
+
+    <!-- all trx list -->
+    <div class="row mt-2 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-primary">Recent Transactions</h4>
+            </div>
+            <div class="card-body" id="allTrxListDisplayContainer">
+                
+            </div>
+            <div class="card-footer text-end">
+                <button class="btn btn-primary" onclick="viewAllTransactions()">View All Transactions</button>
+            </div>
+        </div>
+    </div>
+
+     <!-- to get the loggeduser id in backend ✅  -->
+     <div class="col-4 d-none">
+        <p class="text-warning text-center">
+            <span id="loggedUserIdHiddenValueID" th:text="${loggeduserID}"></span>
+        </p>
+    </div>
 
 </body>
 

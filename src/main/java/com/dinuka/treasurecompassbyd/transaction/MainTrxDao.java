@@ -7,9 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MainTrxDao extends JpaRepository<MainTrx,Integer> {
     
-    //get all trxs by a user
+    //get 5 recent trxs by a user
     @Query(value =  "SELECT * FROM trx as t where t.user_id=?1 order by trx_date desc limit 5;", nativeQuery = true)
-    public List<MainTrx> getTrxListByuser(Integer userId);
+    public List<MainTrx> getRecentTrxListByuser(Integer userId);
+
+    //get all the trxs
+    @Query(value =  "SELECT * FROM trx as t where t.user_id=?1 order by trx_date desc ;", nativeQuery = true)
+    public List<MainTrx> getAllTrxListByuser(Integer userId);
 }
 
 

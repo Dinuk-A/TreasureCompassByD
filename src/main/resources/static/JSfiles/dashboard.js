@@ -502,7 +502,7 @@ const validateTrxAmount = () => {
 //display trx list
 const displayTrxList = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
-    let trxListByUser = ajaxGetRequest("/trx/byuser/" + userID);
+    let trxListByUser = ajaxGetRequest("/recenttrx/byuser/" + userID);
 
     trxListDisplayContainer.innerHTML = '';
     trxListByUser.forEach(trx => {
