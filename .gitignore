@@ -36,6 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-# Ignore datatables folder
+# Ignore datatables and BT folders
 src/main/resources/static/resources/datatables-1.13.6/
+
+src/main/resources/static/resources/bootstrap-5.2.3
+
 
