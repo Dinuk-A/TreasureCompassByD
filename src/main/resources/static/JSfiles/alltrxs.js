@@ -26,7 +26,7 @@ const displayTrxs = () => {
             classes = "text-danger fw-bold";
         }
 
-        let accDisplayName = trx.is_from_cashinhand ? "Cash In Hand" : trx.account_id.acc_display_name;
+        let accDisplayName = trx.is_involve_cashinhand ? "Cash In Hand" : trx.account_id.acc_display_name;
 
         // Create table row
         const row = document.createElement('tr');
@@ -111,7 +111,7 @@ const openEditModal = () => {
     }
 
     // Set destination radio buttons
-    if (selectedTransaction.is_from_cashinhand) {
+    if (selectedTransaction.is_involve_cashinhand) {
         document.getElementById("toWallet").checked = true;
         document.getElementById("accountSelection").style.display = 'none';
     } else {
@@ -149,7 +149,7 @@ const displayTrxsOri = () => {
 
         //for differentiate records that doesnt have an account id
         let accDisplayName;
-        if (!trx.is_from_cashinhand) {
+        if (!trx.is_involve_cashinhand) {
             accDisplayName = trx.account_id.acc_display_name;
         } else {
             accDisplayName = "Cash In Hand";
@@ -220,5 +220,17 @@ const displayTrxsOri = () => {
 //     console.log(trx.amount);
 // }
 
+/*Option 1 (Dark and Muted Blue):
+
+Hover: #3a3a3a (dark gray)
+Highlight: #4A7A8C (muted blue-gray)
+Option 2 (Elegant Dark Cyan):
+
+Hover: #404040 (slate gray)
+Highlight: #2C6F91 (dark cyan)
+Option 3 (Deep Navy and Gray):
+
+Hover: #484848 (charcoal gray)
+Highlight: #2B4A6F (deep navy)*/
 
 

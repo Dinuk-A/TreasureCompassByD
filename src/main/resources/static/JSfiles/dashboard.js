@@ -44,7 +44,6 @@ const submitCashInHandChanges = () => {
             alert('successfully updated');
             $('#modalEditCashInHand').modal('hide');
             formEditCashInHand.reset();
-            refreshCashInHandEditForm();
             window.location.reload();
 
         } else {
@@ -220,7 +219,6 @@ const submitNewAccount = () => {
             alert('successfully saved');
             $('#modalAddNewAccount').modal('hide');
             formAddNewAccount.reset();
-            refreshAddAccForm();
             window.location.reload();
 
         } else {
@@ -321,7 +319,6 @@ const submitNewTransaction = () => {
             alert('successfully saved');
             $('#modalAddNewTrxRec').modal('hide');
             formAddNewTransaction.reset();
-            refreshTrxForm();
             window.location.reload();
 
         } else {
@@ -392,9 +389,9 @@ const changesBasedOnTrxType = () => {
 
 
     } else if (expenseRadio.checked) {
-         //clear out any previous values given if changes
-         inputTrxAmount.value = "";
-         inputTrxAmount.style.border = "2px solid #ced4da";
+        //clear out any previous values given if changes
+        inputTrxAmount.value = "";
+        inputTrxAmount.style.border = "2px solid #ced4da";
 
         transactionObj.trx_category_id = null;
         transactionObj.amount = null;
@@ -436,7 +433,7 @@ const toggleAccountSelection = () => {
         accountSelectionId.classList.remove('d-none');
 
         //for backend
-        transactionObj.is_from_cashinhand = false;
+        transactionObj.is_involve_cashinhand = false;
 
     } else {
         //clear any previous selections
@@ -446,7 +443,7 @@ const toggleAccountSelection = () => {
         inputTrxAmount.style.border = "2px solid #ced4da";
 
         //for backend
-        transactionObj.is_from_cashinhand = true;
+        transactionObj.is_involve_cashinhand = true;
 
         passCurrentBalance();
     }
@@ -455,9 +452,11 @@ const toggleAccountSelection = () => {
 //validate to prevent spending more than the max amount
 const validateTrxAmount = () => {
 
+    const incomeRadio = document.getElementById('income');
+    const expenseRadio = document.getElementById('expense');
+
     let trxAmount = parseFloat(inputTrxAmount.value);
     let cashInhandBal = loggedUserObject.cash_in_hand;
-    const expenseRadio = document.getElementById('expense');
 
     if (expenseRadio.checked && toAccount.checked) {
 
@@ -479,7 +478,6 @@ const validateTrxAmount = () => {
 
         }
 
-
     } else if (expenseRadio.checked && toWallet.checked) {
 
         if (trxAmount > cashInhandBal) {
@@ -487,6 +485,40 @@ const validateTrxAmount = () => {
             inputTrxAmount.style.border = "2px solid red";
             transactionObj.amount = null;
             console.log("Transfer amount exceeds the cash in hand balance");
+            console.log(transactionObj.amount);
+
+        } else {
+
+            transactionObj.amount = inputTrxAmount.value;
+            inputTrxAmount.style.border = "2px solid lime";
+            console.log(transactionObj.amount);
+
+        }
+    } else if (incomeRadio.checked && toWallet.checked) {
+
+        if (trxAmount > cashInhandBal) {
+
+            inputTrxAmount.style.border = "2px solid red";
+            transactionObj.amount = null;
+            console.log("Transfer amount exceeds the cash in hand balance");
+            console.log(transactionObj.amount);
+
+        } else {
+
+            transactionObj.amount = inputTrxAmount.value;
+            inputTrxAmount.style.border = "2px solid lime";
+            console.log(transactionObj.amount);
+
+        }
+    } else if (incomeRadio.checked && toAccount.checked) {
+        let selectedAcc = JSON.parse(selectTrxAccount.value);
+        let crntBalInAcc = selectedAcc.balance;
+
+        if (trxAmount > crntBalInAcc) {
+
+            console.log("Transfer amount exceeds the account balance");
+            transactionObj.amount = null;
+            inputTrxAmount.style.border = "2px solid red";
             console.log(transactionObj.amount);
 
         } else {
@@ -524,7 +556,7 @@ const displayTrxList = () => {
 
         //for differentiate records that doesnt have an account id
         let accDisplayName;
-        if (!trx.is_from_cashinhand) {
+        if (!trx.is_involve_cashinhand) {
             accDisplayName = trx.account_id.acc_display_name;
         } else {
             accDisplayName = "Cash In Hand";
@@ -691,7 +723,6 @@ const submitNewTransfer = () => {
             alert('successfully saved');
             $('#modalInternalTransfers').modal('hide');
             formTransferFunds.reset();
-            refreshTransferForm();
             window.location.reload();
 
         } else {

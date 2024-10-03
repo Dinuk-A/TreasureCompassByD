@@ -83,7 +83,7 @@ public class MainTrxController {
                 }
 
                 // Deduct from cash in hand if flagged
-                if (trxEntity.getIs_from_cashinhand()) {
+                if (trxEntity.getIs_involve_cashinhand()) {
                     loggedUser.setCash_in_hand(currentCashInHandBal.subtract(trxEntity.getAmount()));
 
                     // Save the updated user cash in hand balance
@@ -107,7 +107,7 @@ public class MainTrxController {
                 }
 
                 // Add to cash in hand if flagged
-                if (trxEntity.getIs_from_cashinhand()) {
+                if (trxEntity.getIs_involve_cashinhand()) {
                     loggedUser.setCash_in_hand(currentCashInHandBal.add(trxEntity.getAmount()));
 
                     // Save the updated user cash in hand balance

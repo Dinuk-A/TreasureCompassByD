@@ -12,6 +12,9 @@ import java.math.BigDecimal;
 
 import com.dinuka.treasurecompassbyd.Account.Account;
 import com.dinuka.treasurecompassbyd.Account.AccountDao;
+import com.dinuka.treasurecompassbyd.transaction.MainTrx;
+import com.dinuka.treasurecompassbyd.transaction.MainTrxDao;
+import com.dinuka.treasurecompassbyd.transaction.TrxCategoryDao;
 import com.dinuka.treasurecompassbyd.user.User;
 import com.dinuka.treasurecompassbyd.user.UserDao;
 
@@ -27,14 +30,61 @@ public class TransferController {
     @Autowired
     private AccountDao accDao;
 
+    @Autowired
+    private MainTrxDao mainTrxDao;
+
+    @Autowired
+    private TrxCategoryDao trxCategoryDao;
+
     @PostMapping("/trfr/save")
     public String saveTransferInfo(@RequestBody Transfer trfrEntity) {
-        System.out.println("trfr entity>>>" + trfrEntity);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User loggedUser = uDao.getByUName(auth.getName());
 
         try {
+            // create trx records for each transfer
+            // 1 expense record
+            MainTrx newExpenseRecord = new MainTrx();
+            newExpenseRecord.setAmount(trfrEntity.getAmount());
+            newExpenseRecord.setTrx_date(trfrEntity.getTransfer_date());
+            newExpenseRecord.setDescription(trfrEntity.getDescription());
+            newExpenseRecord.setTrx_type("EXPENSE");
+            newExpenseRecord.setStatus(true);
+            newExpenseRecord.setTrx_category_id(trxCategoryDao.getReferenceById(33));
+            newExpenseRecord.setUser_id(loggedUser.getId());
+
+            if (trfrEntity.getSource_account_id().getId() != -10) {
+                newExpenseRecord.setAccount_id(trfrEntity.getSource_account_id());
+                newExpenseRecord.setIs_involve_cashinhand(false);
+            } else if (trfrEntity.getSource_account_id().getId() == -10) {
+                newExpenseRecord.setIs_involve_cashinhand(true);
+                newExpenseRecord.setAccount_id(null);
+            }
+
+            // 2 income record
+            MainTrx newIncomeRecord = new MainTrx();
+            newIncomeRecord.setAmount(trfrEntity.getAmount());
+            newIncomeRecord.setTrx_date(trfrEntity.getTransfer_date());
+            newIncomeRecord.setDescription(trfrEntity.getDescription());
+            newIncomeRecord.setTrx_type("INCOME");
+            newIncomeRecord.setStatus(true);
+            newIncomeRecord.setTrx_category_id(trxCategoryDao.getReferenceById(32));
+            newIncomeRecord.setUser_id(loggedUser.getId());
+
+            if (trfrEntity.getDestination_account_id().getId() != -10) {
+                newIncomeRecord.setAccount_id(trfrEntity.getDestination_account_id());
+                newIncomeRecord.setIs_involve_cashinhand(false);
+            } else if (trfrEntity.getDestination_account_id().getId() == -10) {
+                newIncomeRecord.setIs_involve_cashinhand(true);
+                newIncomeRecord.setAccount_id(null);
+            }
+
+            mainTrxDao.save(newIncomeRecord);
+            mainTrxDao.save(newExpenseRecord);
+
+            // =======================================================================
+
             // Get the current balance of user's physical wallet (cash in hand)
             BigDecimal currentCashInHandBalance = loggedUser.getCash_in_hand();
 
@@ -54,12 +104,19 @@ public class TransferController {
                 // Save both accounts
                 accDao.save(sourceAcc);
                 accDao.save(destiAcc);
+
+                // phy wallet attrs
+                trfrEntity.setIs_from_phy_wall(false);
+                trfrEntity.setIs_to_phy_wall(false);
             }
 
             // 2 (physical wallet -> account)
             if (trfrEntity.getSource_account_id().getId() == -10) {
-                trfrEntity.setSource_account_id(null); // No account ID for physical wallet
+
+                trfrEntity.setSource_account_id(null);
+
                 trfrEntity.setIs_from_phy_wall(true);
+                trfrEntity.setIs_to_phy_wall(false);
 
                 // Deduct from user's cash in hand balance (physical wallet)
                 BigDecimal newCashInHandBal = currentCashInHandBalance.subtract(trfrEntity.getAmount());
@@ -80,6 +137,7 @@ public class TransferController {
             if (trfrEntity.getDestination_account_id().getId() == -10) {
                 trfrEntity.setDestination_account_id(null);
                 trfrEntity.setIs_to_phy_wall(true);
+                trfrEntity.setIs_from_phy_wall(true);
 
                 // Add to user's cash in hand balance (physical wallet)
                 BigDecimal newCashInHandBal = currentCashInHandBalance.add(trfrEntity.getAmount());

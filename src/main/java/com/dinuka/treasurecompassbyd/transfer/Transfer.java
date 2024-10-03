@@ -54,9 +54,11 @@ public class Transfer {
     private String description;
 
     @Column(name = "is_from_phy_wall")
+    @NotNull
     private Boolean is_from_phy_wall;
 
     @Column(name = "is_to_phy_wall")
+    @NotNull
     private Boolean is_to_phy_wall;
 
 }

@@ -66,7 +66,7 @@ public class MainTrx {
   @JoinColumn(name = "account_id", referencedColumnName = "id")
   private Account account_id;
 
-  @Column(name = "is_from_cashinhand")
-  private Boolean is_from_cashinhand;
+  @Column(name = "is_involve_cashinhand")
+  private Boolean is_involve_cashinhand;
 
 }
