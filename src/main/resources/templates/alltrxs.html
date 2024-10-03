@@ -19,7 +19,7 @@
         }
 
         #allTrxTable th {
-            background-color: #4CAF50;
+            background-color: #1ecb0a;
             color: white;
             padding: 10px;
             border: none;
@@ -48,7 +48,7 @@
 
         #allTrxTable tr:hover {
             /* background-color: rgb(45, 83, 114); */
-            background-color: #6E6E6E 
+            background-color: #6E6E6E
         }
 
 
@@ -96,8 +96,15 @@
         .highlight {
             background-color: #4CAF50 !important;
             /* background-color: rgb(104, 229, 233) !important; */
-            color: #fff  !important;
-                   
+            color: #fff !important;
+        }
+
+        #floatingActionMenu.visible {
+            display: block;
+        }
+
+        #floatingActionMenu {
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
@@ -118,9 +125,9 @@
         </div>
     </div>
 
-    <!-- display all trx list -->
+    <!-- display all trx table -->
     <div class="row mt-2 mx-auto">
-        <div class="card bg-info">
+        <div class="col-12 card bg-info" id="mainTableColDivId">
             <div class="card-header">
                 <h4 class="text-primary">All Transactions</h4>
             </div>
@@ -132,6 +139,7 @@
                             <th>Category</th>
                             <th>Account/Cash</th>
                             <th>Amount</th>
+
                         </tr>
                     </thead>
                     <tbody id="allTrxListDisplayContainer">
@@ -143,144 +151,157 @@
                 <!-- Footer content, if needed -->
             </div>
         </div>
-    </div>
 
+        <div class="col-4 d-none" id="mainCanvasColDivId">
 
-    <!-- Edit Trx Modal -->
-    <div id="modalUpdateTrxRec" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content border-warning">
-
-                <!-- modal header -->
-                <div class="modal-header bg-dark">
-                    <h2 class="modal-title fw-bold text-warning">Update Transaction</h2>
-                    <button type="button" class="bg-warning btn-close" data-bs-dismiss="modal"
-                        onclick="window.location.reload()"></button>
-                </div>
-
-                <!-- modal body -->
-                <div class="modal-body bg-light">
-
-                    <!-- form starts -->
-                    <form id="formUpdateTransaction" onsubmit="return false">
-
-                        <!-- type -->
-                        <div class="row mb-3 d-flex justify-content-center">
-
-                            <div class="col-12 text-center">
-                                <div>
-                                    <input type="radio" class="btn-check" name="trxMaintype" id="income"
-                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="INCOME">
-
-                                    <label class="btn btn-lg btn-outline-success" for="income">INCOME</label>
-
-                                    <input type="radio" class="btn-check" name="trxMaintype" id="expense"
-                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="EXPENSE">
-
-                                    <label class="btn btn-lg btn-outline-danger" for="expense">EXPENSE</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- To or From-->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label id="labelToOrFrom" class="form-label fw-bold"> To :</label>
-                            </div>
-                            <div class="col-7">
-                                <div>
-                                    <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
-                                        autocomplete="off" onclick="toggleAccountSelection()" disabled>
-                                    <label class="btn btn-outline-primary" for="toWallet" id="toWalletRadioLabel">To
-                                        Wallet</label>
-
-                                    <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
-                                        autocomplete="off"
-                                        onclick="toggleAccountSelection(); selectTrxAccount.disabled = false;" disabled>
-                                    <label class="btn btn-outline-warning" for="toAccount" id="toAccountRadioLabel">To
-                                        an
-                                        Account</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Account Selection -->
-                        <div class="row mt-2 d-none" id="accountSelection">
-                            <div class="col-5">
-                                <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
-                            </div>
-                            <div class="col-7">
-                                <select id="selectTrxAccount" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','account_id'); passCurrentBalance(this); inputTrxAmount.style.border = '2px solid #ced4da'; "
-                                    disabled>
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Amount -->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label for="inputTrxAmount" class="form-label fw-bold"> Amount :</label>
-                            </div>
-                            <div class="col-7">
-                                <input id="inputTrxAmount" type="number" class="form-control" step="0.01" min="0"
-                                    required onkeyup="validateTrxAmount();" disabled>
-                            </div>
-                        </div>
-
-                        <!-- Transaction Date -->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label for="inputTrxDate" class="form-label fw-bold"> Transaction Date :</label>
-                            </div>
-                            <div class="col-7">
-                                <input id="inputTrxDate" type="date" class="form-control" required
-                                    onchange="inputFieldValidator(this,'','transactionObj','trx_date')"
-                                    onkeydown="return false" disabled>
-                            </div>
-                        </div>
-
-                        <!-- Transaction Category -->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label for="selectTrxCategory" class="form-label fw-bold"> Transaction Category
-                                    :</label>
-                            </div>
-                            <div class="col-7">
-                                <select id="selectTrxCategory" class="form-select"
-                                    onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required
-                                    disabled>
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="row mt-2">
-                            <div class="col-5">
-                                <label for="inputTrxDescription" class="form-label fw-bold"> Description :</label>
-                            </div>
-                            <div class="col-7">
-                                <textarea id="inputTrxDescription" class="form-control" rows="2"
-                                    onkeyup="inputFieldValidator(this,'','transactionObj','description')"
-                                    disabled></textarea>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-
-                <!-- modal footer -->
-                <div class="modal-footer py-0">
-                    <button type="reset" class="btn btn-danger me-2">Clear</button>
-
-                    <button type="button" class="btn btn-primary" onclick="editTransaction();">Update</button>
-
-                </div>
-            </div>
         </div>
     </div>
+
+    <!-- edit trx canvas -->
+    <div class="offcanvas offcanvas-start" tabindex="1" id="offcanvasEditTrx" aria-labelledby="offcanvasLeftLabel"
+        data-bs-backdrop="static" style="width: 450px;">
+
+        <!-- canvas header starts -->
+        <div class="offcanvas-header bg-dark">
+            <h5 class="offcanvas-title fw-bold text-warning" id="offcanvasLeftLabel">
+                Manage Transaction Record
+            </h5>
+            <button type="button" class="btn-close bg-warning" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <!-- onclick="window.location.reload()" -->
+        </div>
+
+        <!-- canvas body starts -->
+        <div class="offcanvas-body bg-light">
+            <!-- form starts -->
+            <form id="formEditTransaction" onsubmit="return false">
+
+                <!-- type -->
+                <div class="row mb-3 d-flex justify-content-center">
+
+                    <div class="col-12 text-center">
+                        <div>
+                            <input type="radio" class="btn-check" name="trxMaintype" id="income" autocomplete="off"
+                                onclick="changesBasedOnTrxType()" value="INCOME">
+
+                            <label class="btn btn-lg btn-outline-success" for="income">INCOME</label>
+
+                            <input type="radio" class="btn-check" name="trxMaintype" id="expense" autocomplete="off"
+                                onclick="changesBasedOnTrxType()" value="EXPENSE">
+
+                            <label class="btn btn-lg btn-outline-danger" for="expense">EXPENSE</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- To or From-->
+                <div class="row mt-2">
+                    <div class="col-5">
+                        <label id="labelToOrFrom" class="form-label fw-bold"> To :</label>
+                    </div>
+                    <div class="col-7">
+                        <div>
+                            <input type="radio" class="btn-check" name="fundDestination" id="toWallet"
+                                autocomplete="off" onclick="toggleAccountSelection()" disabled>
+                            <label class="btn btn-outline-primary" for="toWallet" id="toWalletRadioLabel">To
+                                Wallet</label>
+
+                            <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
+                                autocomplete="off"
+                                onclick="toggleAccountSelection(); selectTrxAccount.disabled = false;" disabled>
+                            <label class="btn btn-outline-warning" for="toAccount" id="toAccountRadioLabel">To
+                                an
+                                Account</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Selection -->
+                <div class="row mt-2 d-none" id="accountSelection">
+                    <div class="col-5">
+                        <label for="selectTrxAccount" class="form-label fw-bold"> Select Account :</label>
+                    </div>
+                    <div class="col-7">
+                        <select id="selectTrxAccount" class="form-select"
+                            onchange="selectDynamicVal(this,'','transactionObj','account_id'); passCurrentBalance(this); inputTrxAmount.style.border = '2px solid #ced4da'; "
+                            disabled>
+
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="row mt-2">
+                    <div class="col-5">
+                        <label for="inputTrxAmount" class="form-label fw-bold"> Amount :</label>
+                    </div>
+                    <div class="col-7">
+                        <input id="inputTrxAmount" type="number" class="form-control" step="0.01" min="0" required
+                            onkeyup="validateTrxAmount();" >
+                    </div>
+                </div>
+
+                <!-- Transaction Date -->
+                <div class="row mt-2">
+                    <div class="col-5">
+                        <label for="inputTrxDate" class="form-label fw-bold"> Date :</label>
+                    </div>
+                    <div class="col-7">
+                        <input id="inputTrxDate" type="date" class="form-control" required
+                            onchange="inputFieldValidator(this,'','transactionObj','trx_date')" onkeydown="return false"
+                            >
+                    </div>
+                </div>
+
+                <!-- Transaction Category -->
+                <div class="row mt-2">
+                    <div class="col-5">
+                        <label for="selectTrxCategory" class="form-label fw-bold"> Category
+                            :</label>
+                    </div>
+                    <div class="col-7">
+                        <select id="selectTrxCategory" class="form-select"
+                            onchange="selectDynamicVal(this,'','transactionObj','trx_category_id')" required disabled>
+
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="row mt-2">
+                    <div class="col-5">
+                        <label for="inputTrxDescription" class="form-label fw-bold"> Description :</label>
+                    </div>
+                    <div class="col-7">
+                        <textarea id="inputTrxDescription" class="form-control" rows="2"
+                            onkeyup="inputFieldValidator(this,'','transactionObj','description')" disabled></textarea>
+                    </div>
+                </div>
+
+                <!-- buttons -->
+                <div class="row mt-2 ">
+                    <div class="col-10 text-end">
+                        <button type="reset" class="btn btn-warning me-2">Clear</button>
+
+                        <button type="button" class="btn btn-info" onclick="editTransaction();">Update</button>
+
+                        <button type="button" class="btn btn-danger" onclick="deleteTransaction();">Delete</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- canvas btn starts -->
+    <!-- <div class="row mt-2">
+        <div class="d-flex justify-content-center">
+            <button class="btn modal-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPrv"
+                aria-controls="offcanvasPrv">
+                Manage Privileges
+            </button>
+        </div>
+    </div> -->
+
 
     <!-- to get the loggeduser id in backend ✅  -->
     <div class="col-4 d-none">
@@ -290,5 +311,7 @@
     </div>
 
 </body>
+
+
 
 </html>

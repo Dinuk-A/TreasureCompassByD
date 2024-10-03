@@ -63,14 +63,3 @@ public class Transfer {
 
 }
 
-/*
- * id int PK
- * transfer_date date
- * amount decimal(10,2)
- * source_account_id int
- * destination_account_id int
- * status tinyint
- * description text
- * is_from_phy_wall tinyint
- * is_to_phy_wall
- */

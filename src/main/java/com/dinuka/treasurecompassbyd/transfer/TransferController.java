@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.dinuka.treasurecompassbyd.Account.Account;
 import com.dinuka.treasurecompassbyd.Account.AccountDao;
@@ -43,48 +44,6 @@ public class TransferController {
         User loggedUser = uDao.getByUName(auth.getName());
 
         try {
-            // create trx records for each transfer
-            // 1 expense record
-            MainTrx newExpenseRecord = new MainTrx();
-            newExpenseRecord.setAmount(trfrEntity.getAmount());
-            newExpenseRecord.setTrx_date(trfrEntity.getTransfer_date());
-            newExpenseRecord.setDescription(trfrEntity.getDescription());
-            newExpenseRecord.setTrx_type("EXPENSE");
-            newExpenseRecord.setStatus(true);
-            newExpenseRecord.setTrx_category_id(trxCategoryDao.getReferenceById(33));
-            newExpenseRecord.setUser_id(loggedUser.getId());
-
-            if (trfrEntity.getSource_account_id().getId() != -10) {
-                newExpenseRecord.setAccount_id(trfrEntity.getSource_account_id());
-                newExpenseRecord.setIs_involve_cashinhand(false);
-            } else if (trfrEntity.getSource_account_id().getId() == -10) {
-                newExpenseRecord.setIs_involve_cashinhand(true);
-                newExpenseRecord.setAccount_id(null);
-            }
-
-            // 2 income record
-            MainTrx newIncomeRecord = new MainTrx();
-            newIncomeRecord.setAmount(trfrEntity.getAmount());
-            newIncomeRecord.setTrx_date(trfrEntity.getTransfer_date());
-            newIncomeRecord.setDescription(trfrEntity.getDescription());
-            newIncomeRecord.setTrx_type("INCOME");
-            newIncomeRecord.setStatus(true);
-            newIncomeRecord.setTrx_category_id(trxCategoryDao.getReferenceById(32));
-            newIncomeRecord.setUser_id(loggedUser.getId());
-
-            if (trfrEntity.getDestination_account_id().getId() != -10) {
-                newIncomeRecord.setAccount_id(trfrEntity.getDestination_account_id());
-                newIncomeRecord.setIs_involve_cashinhand(false);
-            } else if (trfrEntity.getDestination_account_id().getId() == -10) {
-                newIncomeRecord.setIs_involve_cashinhand(true);
-                newIncomeRecord.setAccount_id(null);
-            }
-
-            mainTrxDao.save(newIncomeRecord);
-            mainTrxDao.save(newExpenseRecord);
-
-            // =======================================================================
-
             // Get the current balance of user's physical wallet (cash in hand)
             BigDecimal currentCashInHandBalance = loggedUser.getCash_in_hand();
 
@@ -154,9 +113,60 @@ public class TransferController {
                 accDao.save(sourceAcc);
             }
 
+            // =======================================================================
+
             // Save the transfer record
             trfrEntity.setStatus(true);
             transferDao.save(trfrEntity);
+
+            // =======================================================================
+
+            // create trx records for each transfer
+            // 1 expense record
+            String defaultDescription = (trfrEntity.getDescription()==null||trfrEntity.getDescription().isEmpty())? "System Generated Record" : trfrEntity.getDescription();
+
+            MainTrx newExpenseRecord = new MainTrx();
+
+            newExpenseRecord.setAmount(trfrEntity.getAmount());
+            newExpenseRecord.setTrx_date(trfrEntity.getTransfer_date());
+            newExpenseRecord.setDescription(defaultDescription);
+            newExpenseRecord.setTrx_type("EXPENSE");
+            newExpenseRecord.setStatus(true);
+            newExpenseRecord.setTrx_category_id(trxCategoryDao.getReferenceById(33));
+            newExpenseRecord.setUser_id(loggedUser.getId());
+            newExpenseRecord.setTrfr_id(trfrEntity.getId());
+
+            if (trfrEntity.getSource_account_id().getId() != -10) {
+                newExpenseRecord.setAccount_id(trfrEntity.getSource_account_id());
+                newExpenseRecord.setIs_involve_cashinhand(false);
+            } else if (trfrEntity.getSource_account_id().getId() == -10) {
+                newExpenseRecord.setIs_involve_cashinhand(true);
+                newExpenseRecord.setAccount_id(null);
+            }
+
+            // 2 income record
+            MainTrx newIncomeRecord = new MainTrx();
+
+            newIncomeRecord.setAmount(trfrEntity.getAmount());
+            newIncomeRecord.setTrx_date(trfrEntity.getTransfer_date());
+            newIncomeRecord.setDescription(defaultDescription);
+            newIncomeRecord.setTrx_type("INCOME");
+            newIncomeRecord.setStatus(true);
+            newIncomeRecord.setTrx_category_id(trxCategoryDao.getReferenceById(32));
+            newIncomeRecord.setUser_id(loggedUser.getId());
+            newIncomeRecord.setTrfr_id(trfrEntity.getId());
+
+            if (trfrEntity.getDestination_account_id().getId() != -10) {
+                newIncomeRecord.setAccount_id(trfrEntity.getDestination_account_id());
+                newIncomeRecord.setIs_involve_cashinhand(false);
+            } else if (trfrEntity.getDestination_account_id().getId() == -10) {
+                newIncomeRecord.setIs_involve_cashinhand(true);
+                newIncomeRecord.setAccount_id(null);
+            }
+
+            mainTrxDao.save(newIncomeRecord);
+            mainTrxDao.save(newExpenseRecord);
+
             return "OK";
         } catch (Exception e) {
             return "Save Not Completed Because: " + e.getMessage();
@@ -181,10 +191,14 @@ public class TransferController {
     public String deleteTransferInfo(@RequestBody Transfer trfrEntityDelete) {
 
         try {
-            trfrEntityDelete.setStatus(false);
-            transferDao.delete(transferDao.getReferenceById(trfrEntityDelete.getId()));
+            List<MainTrx> associateTrxs = mainTrxDao.findByTrfr_id(trfrEntityDelete.getId());
 
-            // transferDao.save(trfrEntityDelete);
+            if (associateTrxs != null && !associateTrxs.isEmpty()) {
+                mainTrxDao.deleteAll(associateTrxs);
+            }
+
+            // hard delete the entire transfer record from db table
+            transferDao.delete(transferDao.getReferenceById(trfrEntityDelete.getId()));
 
             return "OK";
         } catch (Exception e) {

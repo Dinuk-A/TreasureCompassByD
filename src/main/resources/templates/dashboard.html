@@ -59,10 +59,11 @@
                     <h4 class="text-primary">Recent Transactions</h4>
                 </div>
                 <div class="card-body" id="trxListDisplayContainer">
-                   
+
                 </div>
                 <div class="card-footer text-end">
-                    <button class="btn btn-primary" onclick="window.location.assign('/alltrxs');">View All Transactions</button>
+                    <button class="btn btn-primary" onclick="window.location.assign('/alltrxs');">View All
+                        Transactions</button>
                 </div>
             </div>
         </div>
@@ -272,24 +273,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- <div class="row mt-2">
-                            <div class="col-5">
-                                <label class="form-label fw-bold"> Type :</label>
-                            </div>
-                            <div class="col-7">
-                                <div>
-                                    <input type="radio" class="btn-check" name="trxMaintype" id="income"
-                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="INCOME">
-
-                                    <label class="btn btn-outline-success" for="income">INCOME</label>
-
-                                    <input type="radio" class="btn-check" name="trxMaintype" id="expense"
-                                        autocomplete="off" onclick="changesBasedOnTrxType()" value="EXPENSE">
-
-                                    <label class="btn btn-outline-danger" for="expense">EXPENSE</label>
-                                </div>
-                            </div>
-                        </div> -->
 
                         <!-- To or From-->
                         <div class="row mt-2">
@@ -306,7 +289,8 @@
                                     <input type="radio" class="btn-check" name="fundDestination" id="toAccount"
                                         autocomplete="off"
                                         onclick="toggleAccountSelection(); selectTrxAccount.disabled = false;" disabled>
-                                    <label class="btn btn-outline-warning" for="toAccount" id="toAccountRadioLabel">To an
+                                    <label class="btn btn-outline-warning" for="toAccount" id="toAccountRadioLabel">To
+                                        an
                                         Account</label>
                                 </div>
                             </div>
@@ -340,7 +324,7 @@
                         <!-- Transaction Date -->
                         <div class="row mt-2">
                             <div class="col-5">
-                                <label for="inputTrxDate" class="form-label fw-bold"> Transaction Date :</label>
+                                <label for="inputTrxDate" class="form-label fw-bold"> Date :</label>
                             </div>
                             <div class="col-7">
                                 <input id="inputTrxDate" type="date" class="form-control" required
@@ -352,7 +336,7 @@
                         <!-- Transaction Category -->
                         <div class="row mt-2">
                             <div class="col-5">
-                                <label for="selectTrxCategory" class="form-label fw-bold"> Transaction Category
+                                <label for="selectTrxCategory" class="form-label fw-bold"> Category
                                     :</label>
                             </div>
                             <div class="col-7">

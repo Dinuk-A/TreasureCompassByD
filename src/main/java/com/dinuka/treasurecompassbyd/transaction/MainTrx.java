@@ -58,6 +58,9 @@ public class MainTrx {
   @Column(name = "user_id")
   private Integer user_id;
 
+  @Column(name = "trfr_id")
+  private Integer trfr_id;
+
   @ManyToOne
   @JoinColumn(name = "trx_category_id", referencedColumnName = "id")
   private TrxCategory trx_category_id;
