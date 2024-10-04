@@ -131,6 +131,7 @@ public class MainTrxController {
     public String updateTransactionInfo(@RequestBody MainTrx trxEntityPut) {
 
         try {
+            trxEntityPut.setStatus(true);
             mainTrxDao.save(trxEntityPut);
             return "OK";
         } catch (Exception e) {

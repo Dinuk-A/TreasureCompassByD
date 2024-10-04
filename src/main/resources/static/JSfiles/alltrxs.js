@@ -1,5 +1,8 @@
 window.addEventListener('load', () => {
 
+    let userID = loggedUserIdHiddenValueID.innerText;
+    window['loggedUserObject'] = ajaxGetRequest("/user/byid/" + userID);
+
     displayTrxs();
 
 });
@@ -55,6 +58,7 @@ const displayTrxs = () => {
         amountCell.innerText = `${plusOrMinus} ${parseFloat(trx.amount).toFixed(2)}`;
 
         if (trx.trx_category_id.name !== "Internal Transfer") {
+            //row onclick
             row.onclick = function () {
                 if (previouslySelectedRow) {
                     previouslySelectedRow.classList.remove('highlight');
@@ -64,12 +68,35 @@ const displayTrxs = () => {
 
                 selectedTransaction = trx;
 
-                openEditTrxCanvas();
+                openEditTrxCanvas(selectedTransaction);
 
             };
+
+            //row onmouseover
+            const hoverTextTransaction = document.getElementById('hoverTextTrx');
+            row.onmouseover = function (event) {
+                hoverTextTransaction.style.display = 'block';
+                hoverTextTransaction.style.left = event.pageX + 'px';
+                hoverTextTransaction.style.top = event.pageY + 'px';
+            }
+
+            //row onmouseout
+            row.onmouseout = function () {
+                hoverTextTransaction.style.display = 'none';
+            }
+
         } else {
             row.classList.remove('highlight');
-            // row.onmouseover
+
+            const hoverTextTransfer = document.getElementById('hoverTextTrfr');
+            row.onmouseover = function (event) {
+                hoverTextTransfer.style.display = 'block';
+                hoverTextTransfer.style.left = event.pageX + 'px';
+                hoverTextTransfer.style.top = event.pageY + 'px';
+            }
+            row.onmouseout = function () {
+                hoverTextTransfer.style.display = 'none';
+            }
 
         }
 
@@ -94,81 +121,98 @@ const displayTrxs = () => {
 
 }
 
-//to clear out any previous values, borders
-const refreshEditTrxForm =()=>{
-
-   
-    inputTrxAmount.value = ""
-    inputTrxAmount.style.border = "2px solid #ced4da";
-   
-    inputTrxDate.value = ""
-    inputTrxDate.style.border = "2px solid #ced4da";    
-    
-    formEditTransaction.reset();    
-    transactionObj = new Object;
-    
-
-}
-
 //open canvas with already refilled form
-const openEditTrxCanvas = () => {
+const openEditTrxCanvas = (ob) => {
 
-    refreshEditTrxForm();  
+    transactionObj = JSON.parse(JSON.stringify(ob));
 
-    // document.getElementById("inputTrxAmount").value = parseFloat(selectedTransaction.amount).toFixed(2);
+    refreshEditTrxForm();
+
+    document.getElementById("inputTrxAmount").value = parseFloat(transactionObj.amount).toFixed(2);
+
+    document.getElementById("inputTrxDate").value = transactionObj.trx_date;
+
+    const incomeCatList = ajaxGetRequest("/trxcat/income");
+    const expenseCatList = ajaxGetRequest("/trxcat/expense");
+
+    document.getElementById("inputTrxDescription").value = transactionObj.description || "";
+
+    if (transactionObj.trx_type === "INCOME") {
+
+        document.getElementById("income").checked = true;
+        document.getElementById("toWallet").disabled = false;
+        document.getElementById("toAccount").disabled = false;
+        fillDataIntoSelect(selectTrxCategory, "Please Select", incomeCatList, 'name', transactionObj.trx_category_id.name);
+
+    } else {
+
+        document.getElementById("expense").checked = true;
+        document.getElementById("toWallet").disabled = false;
+        document.getElementById("toAccount").disabled = false;
+        fillDataIntoSelect(selectTrxCategory, "Please Select", expenseCatList, 'name', transactionObj.trx_category_id.name);
+    }
+
+    if (transactionObj.is_involve_cashinhand) {
+        transactionObj.is_involve_cashinhand = true;
+        document.getElementById("toWallet").checked = true;
+        document.getElementById("accountSelection").classList.add('d-none');
+    } else {
+        document.getElementById("toAccount").checked = true;
+        document.getElementById("accountSelection").classList.remove('d-none');
+
+        let userID = loggedUserIdHiddenValueID.innerText;
+        accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
+        fillDataIntoSelect(selectTrxAccount, "Select Account", accListByUser, 'acc_display_name', transactionObj.account_id.acc_display_name)
+
+    }
 
     $('#offcanvasEditTrx').offcanvas('show');
 }
 
-/**function openNav() {
-var sidebar = document.getElementById("dashboardSidebarID");
-var mainArea = document.getElementById("mainAreaID");
+//to clear out any previous values, borders >> will be called in openEditCanvas()
+const refreshEditTrxForm = () => {
 
-if (sidebar.classList.contains("open")) {
-sidebar.classList.remove("open");
-sidebar.style.width = "0px"; 
-mainArea.style.marginLeft = "0px"; 
-} else {
-sidebar.classList.add("open");
-sidebar.style.width = "300px"; 
-// mainArea.style.marginLeft = "300px"; 
-mainArea.setAttribute('style','margin-left: 300px;')
+    let userID = loggedUserIdHiddenValueID.innerText;
+    accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
+
+    inputTrxAmount.value = ""
+    inputTrxAmount.style.border = "2px solid #ced4da";
+
+    inputTrxDate.value = ""
+    inputTrxDate.style.border = "2px solid #ced4da";
+
+    selectTrxAccount.value = ""
+    selectTrxAccount.style.border = "2px solid #ced4da";
+    fillDataIntoSelect(selectTrxAccount, "Select Account", accListByUser, 'acc_display_name')
+
+    selectTrxCategory.value = ""
+    selectTrxCategory.style.border = "2px solid #ced4da";
+
+    inputTrxDescription.value = ""
+    inputTrxDescription.style.border = "2px solid #ced4da";
+
+    formEditTransaction.reset();
+
 }
-} */
 
-//fn for edit button
-const openEditModal = () => {
-    console.log("Edit modal opening...");
+// add new trx record
+const editTransaction = () => {
+    const userConfirm = confirm("Are You Sure To Save ?");
+    if (userConfirm) {
 
-    // Populate the modal fields with the selected transaction data
-    document.getElementById("inputTrxAmount").value = parseFloat(selectedTransaction.amount).toFixed(2);
-    document.getElementById("inputTrxDate").value = selectedTransaction.trx_date;
-    document.getElementById("inputTrxDescription").value = selectedTransaction.description || "";
+        let putServiceResponse = ajaxRequest('/trx/update', 'PUT', transactionObj)
+        if (putServiceResponse == "OK") {
+            alert('successfully Updated');
+            $('#offcanvasEditTrx').offcanvas('hide');
+            formEditTransaction.reset();
+            window.location.reload();
 
-    // Set radio buttons based on transaction type
-    if (selectedTransaction.trx_type === "INCOME") {
-        document.getElementById("income").checked = true;
-        document.getElementById("toWallet").disabled = false;
-        document.getElementById("toAccount").disabled = false;
+        } else {
+            alert("An error occured \n" + putServiceResponse);
+        }
     } else {
-        document.getElementById("expense").checked = true;
-        document.getElementById("toWallet").disabled = false;
-        document.getElementById("toAccount").disabled = false;
+        alert("Operation cancelled by the User");
     }
-
-    // Set destination radio buttons
-    if (selectedTransaction.is_involve_cashinhand) {
-        document.getElementById("toWallet").checked = true;
-        document.getElementById("accountSelection").style.display = 'none';
-    } else {
-        document.getElementById("toAccount").checked = true;
-        document.getElementById("accountSelection").style.display = 'block';
-        // Populate the account selection dropdown based on the selected transaction
-        document.getElementById("selectTrxAccount").value = selectedTransaction.account_id.id; // Assuming account_id contains the selected account's id
-    }
-
-    // Show the modal
-    $('#modalUpdateTrxRec').modal('show');
 }
 
 
@@ -254,4 +298,18 @@ Option 3 (Deep Navy and Gray):
 Hover: #484848 (charcoal gray)
 Highlight: #2B4A6F (deep navy)*/
 
+/**function openNav() {
+var sidebar = document.getElementById("dashboardSidebarID");
+var mainArea = document.getElementById("mainAreaID");
 
+if (sidebar.classList.contains("open")) {
+sidebar.classList.remove("open");
+sidebar.style.width = "0px"; 
+mainArea.style.marginLeft = "0px"; 
+} else {
+sidebar.classList.add("open");
+sidebar.style.width = "300px"; 
+// mainArea.style.marginLeft = "300px"; 
+mainArea.setAttribute('style','margin-left: 300px;')
+}
+} */
