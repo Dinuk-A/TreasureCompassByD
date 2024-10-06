@@ -131,19 +131,20 @@ public class MainTrxController {
     public String updateTransactionInfo(@RequestBody MainTrx trxEntityPut) {
 
         try {
+            // Authenticate the user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             User loggedUser = uDao.getByUName(auth.getName());
 
-            // Retrieve original(current) cash in hand balance
+            // Retrieve original (current) cash in hand balance
             BigDecimal currentCashInHandBal = loggedUser.getCash_in_hand();
 
-            // get the new soon to be updating amount of trx, not account
+            // Get the new soon-to-be updating amount of trx
             BigDecimal newTrxAmount = trxEntityPut.getAmount();
 
-            // get existing record
+            // Get existing transaction record
             MainTrx originalTrxRecord = mainTrxDao.getReferenceById(trxEntityPut.getId());
 
-            // get the original(current) amount of the account (check if 0 first)
+            // Get the original (current) amount of the account (check if null first)
             BigDecimal currentBalanceOfAcc;
             if (originalTrxRecord.getAccount_id() != null) {
                 currentBalanceOfAcc = originalTrxRecord.getAccount_id().getBalance();
@@ -151,64 +152,76 @@ public class MainTrxController {
                 currentBalanceOfAcc = BigDecimal.ZERO;
             }
 
-            // get the original trx amount (before updating) (dont need to check wheather 0
-            // , because trx amount cannot be 0 )
+            // Get the original trx amount (before updating)
             BigDecimal originalTrxAmount = originalTrxRecord.getAmount();
 
-            // 1 for incomes✅✅✅
+            // Handle income transactions
             if ("INCOME".equals(trxEntityPut.getTrx_type())) {
 
-                // 1.1 for account related trxs✅✅
-                // 1.1.1 updating new account is the same account as before ✅
-                if (trxEntityPut.getAccount_id() == originalTrxRecord.getAccount_id() &&  !trxEntityPut.getIs_involve_cashinhand()) {
+                // 1.1 Account-Related Income (No Cash in Hand)
+                // 1.1.1 Same account, amount changes
+                if (!trxEntityPut.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() != null &&
+                        originalTrxRecord.getAccount_id() != null &&
+                        trxEntityPut.getAccount_id().getId().equals(originalTrxRecord.getAccount_id().getId())) {
+
                     BigDecimal balanceOfAccBeforeOriginalTrx = currentBalanceOfAcc.subtract(originalTrxAmount);
                     BigDecimal newAccBalanceAfterUpdatedTrxAmount = balanceOfAccBeforeOriginalTrx.add(newTrxAmount);
 
                     Account targetAccOfIncomeSameAcc = trxEntityPut.getAccount_id();
                     targetAccOfIncomeSameAcc.setBalance(newAccBalanceAfterUpdatedTrxAmount);
 
+                    System.out.println("INCOME> ACC > 1.1.1 Same account, amount changes");
+                    System.out.println("Current Balance Of Account: " + currentBalanceOfAcc);
+                    System.out.println("Original Transaction Amount: " + originalTrxAmount);
+                    System.out.println(
+                            "Balance of Account Before Original Transaction: " + balanceOfAccBeforeOriginalTrx);
+                    System.out.println("New Transaction Amount: " + newTrxAmount);
+                    System.out.println("New Account Balance After Update: " + newAccBalanceAfterUpdatedTrxAmount);
+
                     accDao.save(targetAccOfIncomeSameAcc);
                 }
 
-                // 1.1.2 updating new account is a different one from before ✅
-                if (trxEntityPut.getAccount_id() != originalTrxRecord.getAccount_id()) {
+                // 1.1.2 Account changes
+                else if (!trxEntityPut.getIs_involve_cashinhand() &&
+                        originalTrxRecord.getAccount_id() != null &&
+                        trxEntityPut.getAccount_id() != null &&
+                        !trxEntityPut.getAccount_id().getId().equals(originalTrxRecord.getAccount_id().getId())) {
 
-                    // get the trx record's already exist account's current balance
-                    BigDecimal currentBalanceOfOriginalTrxRecordAcc;
-                    if (originalTrxRecord.getAccount_id() != null) {
-                        currentBalanceOfOriginalTrxRecordAcc = originalTrxRecord.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfOriginalTrxRecordAcc = BigDecimal.ZERO;
-                    }
+                    System.out.println("INCOME> ACC > 1.1.2 Account changes");
 
-                    // since this is an income, this wrong amount must be deducted from original
-                    // account to make it back to the right balance
-                    BigDecimal correctedAccBalanceOfOriginaAcc = currentBalanceOfOriginalTrxRecordAcc
-                            .subtract(newTrxAmount);
+                    // Correct the original account's balance
+                    BigDecimal correctedBalanceOfOriginalAcc = currentBalanceOfAcc.subtract(originalTrxAmount);
                     Account originalAccount = originalTrxRecord.getAccount_id();
-                    originalAccount.setBalance(correctedAccBalanceOfOriginaAcc);
+                    originalAccount.setBalance(correctedBalanceOfOriginalAcc);
+
+                    System.out.println("Current Balance Of Existing Account: " + currentBalanceOfAcc);
+                    System.out.println("Corrected Balance Of Original Account: " + correctedBalanceOfOriginalAcc);
+
                     accDao.save(originalAccount);
 
-                    // get the new updating different account's current balance
-                    BigDecimal currentBalanceOfNewUpdatingDiffAcc;
-                    if (trxEntityPut.getAccount_id() != null) {
-                        currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfNewUpdatingDiffAcc = BigDecimal.ZERO;
-                    }
-
-                    // since this is an income , new amount must be added to the new account
+                    // Update the new account's balance
+                    BigDecimal currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
                     BigDecimal newBalanceOfNewAccount = currentBalanceOfNewUpdatingDiffAcc.add(newTrxAmount);
                     Account newAccount = trxEntityPut.getAccount_id();
                     newAccount.setBalance(newBalanceOfNewAccount);
-                    accDao.save(newAccount);
 
+                    System.out
+                            .println("Current Balance Of New Updating Account: " + currentBalanceOfNewUpdatingDiffAcc);
+                    System.out.println("New Transaction Amount: " + newTrxAmount);
+                    System.out.println("New Balance Of New Account: " + newBalanceOfNewAccount);
+
+                    accDao.save(newAccount);
                 }
 
-                // 1.2 for cash in hand involve trxs✅✅
-                // 1.2.1 source is not changed (also wallet)✅
-                if (originalTrxRecord.getIs_involve_cashinhand() == true
-                        && trxEntityPut.getIs_involve_cashinhand() == true) {
+                // 1.2 Cash in Hand Income (Wallet)
+                // 1.2.1 Both involve cash in hand, only amount changes
+                else if (trxEntityPut.getIs_involve_cashinhand() &&
+                        originalTrxRecord.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() == null) {
+
+                    System.out.println("INCOME> CASH > 1.2.1 Both involve cash in hand, only amount changes");
+
                     BigDecimal balanceOFCIHbeforeOriginalTrx = currentCashInHandBal.subtract(originalTrxAmount);
                     BigDecimal newCIHBalanceAfterUpdatedTrxAmount = balanceOFCIHbeforeOriginalTrx.add(newTrxAmount);
 
@@ -216,35 +229,40 @@ public class MainTrxController {
                     uDao.save(loggedUser);
                 }
 
-                // 1.2.1 source changed (to an account)✅
-                if (originalTrxRecord.getIs_involve_cashinhand() == true
-                        && trxEntityPut.getIs_involve_cashinhand() == false) {
+                // 1.2.2 Change from cash in hand to an account
+                else if (originalTrxRecord.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() != null &&
+                        !trxEntityPut.getIs_involve_cashinhand()) {
 
-                    // deduct extra balance from cash in hand
+                    System.out.println("INCOME> CASH > 1.2.2 Change from cash in hand to an account");
+
+                    // Deduct balance from cash in hand
                     BigDecimal balanceOFCIHbeforeOriginalTrx = currentCashInHandBal.subtract(originalTrxAmount);
                     loggedUser.setCash_in_hand(balanceOFCIHbeforeOriginalTrx);
                     uDao.save(loggedUser);
 
-                    BigDecimal currentBalanceOfNewUpdatingDiffAcc;
-                    if (trxEntityPut.getAccount_id() != null) {
-                        currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfNewUpdatingDiffAcc = BigDecimal.ZERO;
-                    }
-
+                    // Update the new account's balance
+                    BigDecimal currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
                     BigDecimal newBalanceOfNewAccount = currentBalanceOfNewUpdatingDiffAcc.add(newTrxAmount);
                     Account newAccount = trxEntityPut.getAccount_id();
                     newAccount.setBalance(newBalanceOfNewAccount);
+
                     accDao.save(newAccount);
                 }
             }
 
-            // 2 for expenses✅✅✅
+            // Handle expense transactions
             if ("EXPENSE".equals(trxEntityPut.getTrx_type())) {
 
-                // 2.1 for account related trxs✅✅
-                // 2.1.1 updating new account is the same account as before ✅
-                if (trxEntityPut.getAccount_id() == originalTrxRecord.getAccount_id() && !trxEntityPut.getIs_involve_cashinhand()) {
+                // 2.1 Account-Related Expense (No Cash in Hand)
+                // 2.1.1 Same account, amount changes
+                if (!trxEntityPut.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() != null &&
+                        originalTrxRecord.getAccount_id() != null &&
+                        trxEntityPut.getAccount_id().getId().equals(originalTrxRecord.getAccount_id().getId())) {
+
+                    System.out.println("EXP ACC 2.1.1 Same account, amount changes");
+
                     BigDecimal balanceOfAccBeforeOriginalTrx = currentBalanceOfAcc.add(originalTrxAmount);
                     BigDecimal newAccBalanceAfterUpdatedTrxAmount = balanceOfAccBeforeOriginalTrx
                             .subtract(newTrxAmount);
@@ -255,45 +273,39 @@ public class MainTrxController {
                     accDao.save(targetAccOfExpenseSameAcc);
                 }
 
-                // 1.1.2 updating new account is a different one from before✅
-                if (trxEntityPut.getAccount_id() != originalTrxRecord.getAccount_id()) {
+                // 2.1.2 Account changes
+                else if (!trxEntityPut.getIs_involve_cashinhand() &&
+                        originalTrxRecord.getAccount_id() != null &&
+                        trxEntityPut.getAccount_id() != null &&
+                        !trxEntityPut.getAccount_id().getId().equals(originalTrxRecord.getAccount_id().getId())) {
 
-                    // get the trx record's already exist account's current balance
-                    BigDecimal currentBalanceOfOriginalTrxRecordAcc;
-                    if (originalTrxRecord.getAccount_id() != null) {
-                        currentBalanceOfOriginalTrxRecordAcc = originalTrxRecord.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfOriginalTrxRecordAcc = BigDecimal.ZERO;
-                    }
+                    System.out.println("EXP ACC 2.1.2 Account changes");
 
-                    // since this is an expense, this missing value should be added to the original
-                    // acc
-                    BigDecimal correctedOriginalBalance = currentBalanceOfOriginalTrxRecordAcc.add(newTrxAmount);
+                    // Correct the original account's balance
+                    BigDecimal currentBalanceOfOriginalTrxRecordAcc = originalTrxRecord.getAccount_id().getBalance();
+                    BigDecimal correctedOriginalBalance = currentBalanceOfOriginalTrxRecordAcc.add(originalTrxAmount);
                     Account originalAccount = originalTrxRecord.getAccount_id();
                     originalAccount.setBalance(correctedOriginalBalance);
+
                     accDao.save(originalAccount);
 
-                    // get the new updating different account's current balance
-                    BigDecimal currentBalanceOfNewUpdatingDiffAcc;
-                    if (trxEntityPut.getAccount_id() != null) {
-                        currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfNewUpdatingDiffAcc = BigDecimal.ZERO;
-                    }
-
-                    // since this is an expense, this extra value should be deducted from the new
-                    // acc
+                    // Update the new account's balance
+                    BigDecimal currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
                     BigDecimal correctedBalanceOfNewAccount = currentBalanceOfNewUpdatingDiffAcc.subtract(newTrxAmount);
                     Account newAccount = trxEntityPut.getAccount_id();
                     newAccount.setBalance(correctedBalanceOfNewAccount);
-                    accDao.save(newAccount);
 
+                    accDao.save(newAccount);
                 }
 
-                // 2.2 for cash in hand involve trxs✅
-                // 2.2.1 source is not changed (also wallet)✅
-                if (originalTrxRecord.getIs_involve_cashinhand() == true
-                        && trxEntityPut.getIs_involve_cashinhand() == true) {
+                // 2.2 Cash in Hand Expense (Wallet)
+                // 2.2.1 Both involve cash in hand, only amount changes
+                else if (trxEntityPut.getIs_involve_cashinhand() &&
+                        originalTrxRecord.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() == null) {
+
+                    System.out.println("EXP CASH 2.2.1 Both involve cash in hand, only amount changes");
+
                     BigDecimal balanceOFCIHbeforeOriginalTrx = currentCashInHandBal.add(originalTrxAmount);
                     BigDecimal newCIHBalanceAfterUpdatedTrxAmount = balanceOFCIHbeforeOriginalTrx
                             .subtract(newTrxAmount);
@@ -302,37 +314,35 @@ public class MainTrxController {
                     uDao.save(loggedUser);
                 }
 
-                // 2.2.1 source changed (to an account)✅✅
-                if (originalTrxRecord.getIs_involve_cashinhand() == true
-                        && trxEntityPut.getIs_involve_cashinhand() == false) {
+                // 2.2.2 Change from cash in hand to an account
+                else if (originalTrxRecord.getIs_involve_cashinhand() &&
+                        trxEntityPut.getAccount_id() != null &&
+                        !trxEntityPut.getIs_involve_cashinhand()) {
 
-                    // add missing balance to cash in hand✅
+                    System.out.println("EXP CASH 2.2.2 Change from cash in hand to an account");
+
+                    // Deduct balance from cash in hand
                     BigDecimal balanceOFCIHbeforeOriginalTrx = currentCashInHandBal.add(originalTrxAmount);
                     loggedUser.setCash_in_hand(balanceOFCIHbeforeOriginalTrx);
                     uDao.save(loggedUser);
 
-                    BigDecimal currentBalanceOfNewUpdatingDiffAcc;
-                    if (trxEntityPut.getAccount_id() != null) {
-                        currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
-                    } else {
-                        currentBalanceOfNewUpdatingDiffAcc = BigDecimal.ZERO;
-                    }
-
+                    // Update the new account's balance
+                    BigDecimal currentBalanceOfNewUpdatingDiffAcc = trxEntityPut.getAccount_id().getBalance();
                     BigDecimal newBalanceOfNewAccount = currentBalanceOfNewUpdatingDiffAcc.subtract(newTrxAmount);
                     Account newAccount = trxEntityPut.getAccount_id();
                     newAccount.setBalance(newBalanceOfNewAccount);
+
                     accDao.save(newAccount);
                 }
-
             }
 
+            // Mark transaction as completed
             trxEntityPut.setStatus(true);
             mainTrxDao.save(trxEntityPut);
             return "OK";
         } catch (Exception e) {
-            return "Update Not Completed Because :" + e.getMessage();
+            return "Update Not Completed Because: " + e.getMessage();
         }
-
     }
 
     // to delete a trx record
