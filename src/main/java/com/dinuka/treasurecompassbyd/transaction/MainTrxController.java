@@ -51,7 +51,7 @@ public class MainTrxController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User loggedUser = uDao.getByUName(auth.getName());
         ModelAndView allTrxView = new ModelAndView();
-        // allTrxView.addObject("loggedusername", auth.getName());
+        allTrxView.addObject("loggedusername", auth.getName());
         allTrxView.addObject("loggeduserID", loggedUser.getId());
         allTrxView.setViewName("alltrxs.html");
         return allTrxView;

@@ -1,7 +1,238 @@
-body{
-    background: black;
-}
-
 :root {
     scroll-behavior: smooth;
+}
+
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Main content area */
+#mainAreaID {
+    background: black;
+    padding: 20px 30px;
+    margin-top: 60px;
+
+    margin-left: 0;
+
+    transition: margin-left 0.3s ease;
+    /* Smooth transition for margin change */
+}
+
+.header {
+    background-color: #03045E;
+    /* Ocean Blue */
+    color: #ffffff;
+    transition: all 0.5s;
+    z-index: 997;
+    height: 60px;
+    box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
+    padding-left: 20px;
+    position: fixed;
+    /* Keeps the header fixed at the top */
+    width: 100%;
+    /* Makes sure the header spans the full width of the viewport */
+    top: 0;
+    left: 0;
+}
+
+.header .toggle-sidebar-btn {
+    font-size: 32px;
+    padding-left: 10px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.header-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header-nav .nav-icon {
+    font-size: 20px;
+    color: #012970;
+}
+
+.header-nav .nav-profile img {
+    max-height: 40px;
+}
+
+.header-nav .nav-profile span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    /* Start with the sidebar hidden */
+    z-index: 996;
+    transition: width 0.3s ease;
+    /* padding: 20px; */
+    overflow-y: auto;
+    background-color: #ADE8F4;
+    /* Sea Green */
+    color: #ffffff;
+    box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+}
+
+.sidebar.open {
+    width: 300px;
+}
+
+.sidebar-nav {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar-nav .nav-item {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav .nav-item a {
+    color: #ffffff;
+    border: 1px solid #87CEEB;
+    /* Sky Blue */
+    margin: 5px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #0077B6;
+    /* Sky Blue */
+    text-decoration: none;
+    display: block;
+}
+
+.sidebar-nav .nav-item a:hover {
+    background-color: #1E90FF;
+    /* Ocean Blue */
+    color: #ffffff;
+}
+
+.sidebar-nav .nav-heading {
+    color: #F4A460;
+    /* Sand Beige */
+    padding: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Logo */
+.logo {
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.logo img {
+    max-height: 26px;
+    margin-right: 6px;
+}
+
+.logo span {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #03045E;
+    /* Sunset Orange */
+    padding: 5px;
+    border-radius: 4px;
+    font-family: "Nunito", sans-serif;
+}
+
+
+/* .custom-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    text-align: center;
+
+} */
+
+.custom-alert {
+    box-shadow: 0 0 10px #f2f2f2;
+    z-index: 1050;
+    position: absolute;
+    top: 10px;
+    left: 30%;
+    background: white;
+    width: 40% !important;
+}
+
+
+.custom-alert-button {
+    margin-top: 10px;
+    width: 80px;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+}
+
+
+.custom-alert-button:hover {
+    background-color: #f1b0b7;
+}
+
+.custom-confirmBox {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 300px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    text-align: center;
+}
+
+.confirm-yes {
+    background-color: #28a745;
+    border: none;
+    color: #fff;
+}
+
+.confirm-yes:hover {
+    background-color: #218838;
+}
+
+.confirm-no {
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+}
+
+.confirm-no:hover {
+    background-color: #c82333;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+
+    }
+
+    100% {
+        opacity: 100%;
+
+    }
 }
