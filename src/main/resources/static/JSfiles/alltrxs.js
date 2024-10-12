@@ -3,8 +3,26 @@ window.addEventListener('load', () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     window['loggedUserObject'] = ajaxGetRequest("/user/byid/" + userID);
 
-    displayTrxs();
+    //get the acc list by user
+    accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
 
+    //add "physical wallet" to the same account list in filters
+    let physicalWallet = {
+        acc_display_name: "Physical Wallet",
+        id: -10
+    }
+    accListByUser.unshift(physicalWallet);
+
+    //add "all" option 
+    let allOption = {
+        acc_display_name: "All",
+        id: -12
+    }
+    accListByUser.unshift(allOption);
+
+    fillDataIntoSelect(accountFilter, "Select Account", accListByUser, 'acc_display_name')
+
+    displayTrxs();
 });
 
 //global vars to be used later
@@ -14,6 +32,7 @@ let selectedTransaction, previouslySelectedRow;
 const displayTrxs = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
+    console.log(allTrxListByUser);
 
     $('#allTrxListDisplayContainer').empty();
 
@@ -215,75 +234,105 @@ const editTransaction = () => {
     }
 }
 
+//date pickers display for filters
+const displayDateFilters = (fieldId) => {
 
-//original
-const displayTrxsOri = () => {
+    var selectedValue = fieldId.value;
+    var singleDateField = document.getElementById('singleDateField');
+    var dateRangeFields = document.getElementById('dateRangeFields');
+
+    // Hide all fields initially by adding d-none
+    singleDateField.classList.add('d-none');
+    dateRangeFields.classList.add('d-none');
+
+    // Show the corresponding fields based on the selected value
+    if (selectedValue === 'singleDate') {
+        singleDateField.classList.remove('d-none');
+    } else if (selectedValue === 'dateRange') {
+        dateRangeFields.classList.remove('d-none');
+    }
+}
+
+//fill category list based on this
+const changesBasedOnTrxTypeVal = () => {
+
+    let allOption = {
+        name: "All",
+        id: -12
+    }
+
+    switch (trxTypeFilter.value) {
+
+        case "income":
+
+            categoryFilter.disabled = false;
+            const incomeCatList = ajaxGetRequest("/trxcat/income");
+            incomeCatList.unshift(allOption);
+            fillDataIntoSelect(categoryFilter, "Please Select", incomeCatList, 'name');
+
+            break;
+
+        case "expense":
+
+            categoryFilter.disabled = false;
+            const expenseCatList = ajaxGetRequest("/trxcat/expense");
+            expenseCatList.unshift(allOption);
+            fillDataIntoSelect(categoryFilter, "Please Select", expenseCatList, 'name');
+
+            break;
+
+        case "all":
+            categoryFilter.disabled = true;
+
+    }
+}
+
+//to reset filters to default
+const resetFilters = () => {
+    // Reset date filter to default
+    document.getElementById('dateFilter').value = 'all';
+    document.getElementById('singleDateField').classList.add('d-none');
+    document.getElementById('dateRangeFields').classList.add('d-none');
+    document.getElementById('monthYearFields').classList.add('d-none');
+
+    // Reset transaction type filter
+    document.getElementById('trxTypeFilter').value = 'all';
+
+    // Reset account filter
+    document.getElementById('accountFilter').value = 'all';
+
+    // Reset category filter
+    document.getElementById('categoryFilter').value = 'all';
+}
+
+//for apply filter button
+const getTrxRecsByFilters = () => {
+
+    //all trx list without any filters
     let userID = loggedUserIdHiddenValueID.innerText;
     let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
 
-    allTrxListByUser.forEach(trx => {
-        let toOrFrom;
-        let plusOrMinus;
-        let classes;
+    //date related selects, except option 'ALL'
+    let singleDateVal = document.getElementById('singleDate').value;
+    let startDateVal = document.getElementById('startDate').value;
+    let endDateVal = document.getElementById('endDate').value;
+    // let monthVal = document.getElementById('monthSelect').value;
+    // let yearVal = document.getElementById('yearSelect').value;
 
-        if (trx.trx_type == "INCOME") {
-            toOrFrom = "To";
-            plusOrMinus = "+ ";
-            classes = "col-3 text-success fw-bold text-end";
+    //other selects, except option 'ALL'
+    let trxtypeVal = document.getElementById('trxTypeFilter').value;
+    let accountVal = document.getElementById('accountFilter').value;
+    let categotyVal = document.getElementById('categoryFilter').value;
 
-        } else {
-            toOrFrom = "From";
-            plusOrMinus = "- ";
-            classes = "col-3 text-danger fw-bold text-end";
-        }
-
-        //for differentiate records that doesnt have an account id
-        let accDisplayName;
-        if (!trx.is_involve_cashinhand) {
-            accDisplayName = trx.account_id.acc_display_name;
-        } else {
-            accDisplayName = "Cash In Hand";
-        }
-
-        //main row
-        const row = document.createElement('div');
-        row.className = "row mx-auto mb-1 border-bottom border-success";
-
-        // date col-2
-        const date = document.createElement('div');
-        date.className = "col-2";
-        date.innerText = trx.trx_date;
-
-        // category col-3
-        const category = document.createElement('div');
-        category.classList.add('col-3')
-        category.innerText = trx.trx_category_id.name;
-
-        //account/cash col-3
-        const account = document.createElement('div');
-        account.classList.add('col-3')
-        account.textContent = `${toOrFrom} : ${accDisplayName}`;
-
-        //space col-1
-        const emptySpace = document.createElement('div');
-        emptySpace.classList.add('col-1')
-
-        //amount col-3
-        const amountDiv = document.createElement('div');
-        amountDiv.className = classes;
-        amountDiv.textContent = `${plusOrMinus} ${parseFloat(trx.amount).toFixed(2)}`;
-
-        row.appendChild(date);
-        row.appendChild(category);
-        row.appendChild(account);
-        row.appendChild(emptySpace);
-        row.appendChild(amountDiv);
-
-        allTrxListDisplayContainer.appendChild(row);
-    });
 
 
 }
+
+/**SELECT * FROM financeappdb.trx 
+WHERE MONTH(trx_date) = MONTH(CURDATE()) AND YEAR(trx_date) = YEAR(CURDATE());
+ */
+
+
 
 /*Option 1 (Dark and Muted Blue):
 
