@@ -3,6 +3,16 @@ window.addEventListener('load', () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     window['loggedUserObject'] = ajaxGetRequest("/user/byid/" + userID);
 
+    refreshFilterForm();
+
+    getAllTrxs();
+
+});
+
+//for filter form
+const refreshFilterForm = () => {
+    let userID = loggedUserIdHiddenValueID.innerText;
+
     //get the acc list by user
     accListByUser = ajaxGetRequest("/account/byuserid/" + userID);
 
@@ -21,22 +31,29 @@ window.addEventListener('load', () => {
     accListByUser.unshift(allOption);
 
     fillDataIntoSelect(accountFilter, "Select Account", accListByUser, 'acc_display_name')
-
-    displayTrxs();
-});
+}
 
 //global vars to be used later
 let selectedTransaction, previouslySelectedRow;
 
 //display main trx table(all)
-const displayTrxs = () => {
+const getAllTrxs = () => {
     let userID = loggedUserIdHiddenValueID.innerText;
     let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
+
     console.log(allTrxListByUser);
+    displayTrxs(allTrxListByUser);
+
+}
+
+//reusable fn for display trx records
+const displayTrxs = (arrayName) => {
+
+    console.log("displayTrxs working");
 
     $('#allTrxListDisplayContainer').empty();
 
-    allTrxListByUser.forEach((trx, index) => {
+    arrayName.forEach((trx, index) => {
 
         let toOrFrom, plusOrMinus, classes;
 
@@ -137,7 +154,6 @@ const displayTrxs = () => {
         lengthChange: false, // Disable ability to change the number of rows
         ordering: false  // Remove up and down arrows
     });
-
 }
 
 //open canvas with already refilled form
@@ -255,59 +271,61 @@ const displayDateFilters = (fieldId) => {
 
 //fill category list based on this
 const changesBasedOnTrxTypeVal = () => {
-
     let allOption = {
         name: "All",
         id: -12
     }
-
     switch (trxTypeFilter.value) {
-
-        case "income":
-
+        case "INCOME":
             categoryFilter.disabled = false;
+            categoryFilter.value = "";
             const incomeCatList = ajaxGetRequest("/trxcat/income");
             incomeCatList.unshift(allOption);
             fillDataIntoSelect(categoryFilter, "Please Select", incomeCatList, 'name');
-
             break;
-
-        case "expense":
-
+        case "EXPENSE":
             categoryFilter.disabled = false;
+            categoryFilter.value = "";
             const expenseCatList = ajaxGetRequest("/trxcat/expense");
             expenseCatList.unshift(allOption);
             fillDataIntoSelect(categoryFilter, "Please Select", expenseCatList, 'name');
-
             break;
-
         case "all":
             categoryFilter.disabled = true;
-
     }
 }
 
 //to reset filters to default
 const resetFilters = () => {
-    // Reset date filter to default
+
     document.getElementById('dateFilter').value = 'all';
     document.getElementById('singleDateField').classList.add('d-none');
     document.getElementById('dateRangeFields').classList.add('d-none');
-    document.getElementById('monthYearFields').classList.add('d-none');
-
-    // Reset transaction type filter
     document.getElementById('trxTypeFilter').value = 'all';
-
-    // Reset account filter
-    document.getElementById('accountFilter').value = 'all';
-
-    // Reset category filter
     document.getElementById('categoryFilter').value = 'all';
+    document.getElementById('categoryFilter').disabled = true;
+    let userID = loggedUserIdHiddenValueID.innerText;
+    let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
+    $('#allTrxListDisplayContainer').empty();
+    if ($.fn.DataTable.isDataTable('#allTrxTable')) {
+        $('#allTrxTable').DataTable().clear().destroy();
+    }
+    displayTrxs(allTrxListByUser);
+  setTimeout(() => {
+        $('#allTrxTable').DataTable({
+            destroy: true, 
+            paging: true,  
+            searching: false, 
+            info: false, 
+            pageLength: 10, 
+            lengthChange: false, 
+            ordering: false  
+        });
+    }, 1000);
 }
 
 //for apply filter button
 const getTrxRecsByFilters = () => {
-
     //all trx list without any filters
     let userID = loggedUserIdHiddenValueID.innerText;
     let allTrxListByUser = ajaxGetRequest("/alltrx/byuser/" + userID);
@@ -316,16 +334,117 @@ const getTrxRecsByFilters = () => {
     let singleDateVal = document.getElementById('singleDate').value;
     let startDateVal = document.getElementById('startDate').value;
     let endDateVal = document.getElementById('endDate').value;
-    // let monthVal = document.getElementById('monthSelect').value;
-    // let yearVal = document.getElementById('yearSelect').value;
+
+    console.log("singleDateVal ", singleDateVal);
+    console.log("startDateVal ", startDateVal);
+    console.log("endDateVal ", endDateVal);
 
     //other selects, except option 'ALL'
     let trxtypeVal = document.getElementById('trxTypeFilter').value;
-    let accountVal = document.getElementById('accountFilter').value;
-    let categotyVal = document.getElementById('categoryFilter').value;
+    console.log("trxtypeVal ", trxtypeVal);
 
+    // Account filter value
+    let accountVal;
+    const accountFilterValue = document.getElementById('accountFilter').value;
+    if (accountFilterValue) {
+        accountVal = JSON.parse(accountFilterValue).id;
+    } else {
+        accountVal = null;
+    }
+    console.log("accountFilterValue", accountFilterValue);
+    console.log("accountVal", accountVal);
 
+    // Category filter value
+    let categoryVal;
+    const categoryFilterValue = document.getElementById('categoryFilter').value;
+    if (categoryFilterValue) {
+        categoryVal = JSON.parse(categoryFilterValue).id;
+    } else {
+        categoryVal = null;
+    }
+    console.log("categoryFilterValue", categoryFilterValue);
+    console.log("categoryVal", categoryVal);
 
+    //empty vars for use later when building the final filter statement
+    let dateCondition = () => true; // Default to true for date condition
+    let trxTypeCondition = () => true; // Default to true for transaction type condition
+    let accountCondition = () => true; // Default to true for account condition
+    let categoryCondition = () => true; // Default to true for category condition
+
+    //for trx date
+    if (singleDateVal) {
+        const singleDateDate = new Date(singleDateVal);
+
+        console.log("singleDateDate ", singleDateDate);
+
+        dateCondition = (trx) => {
+            const trxDate = new Date(trx.trx_date);
+            return trxDate.getTime() === singleDateDate.getTime();
+        };
+    } else if (startDateVal || endDateVal) {
+        const startDateDate = startDateVal ? new Date(startDateVal) : null;
+        const endDateDate = endDateVal ? new Date(endDateVal) : null;
+
+        console.log("startDateDate ", startDateDate);
+        console.log("endDateDate ", endDateDate);
+
+        dateCondition = (trx) => {
+            const trxDate = new Date(trx.trx_date);
+            return (!startDateDate || trxDate >= startDateDate) && (!endDateDate || trxDate <= endDateDate);
+        };
+    }
+
+    //for trx_type
+    if (trxtypeVal === "INCOME" || trxtypeVal === "EXPENSE") {
+        trxTypeCondition = (trx) => trx.trx_type === trxtypeVal;
+    }
+
+    // for accounts      
+    if (accountVal === -12) {
+        accountCondition = () => true; // No filtering for 'All' accounts
+    } else if (accountVal === -10) {
+        accountCondition = (trx) => trx.is_involve_cashinhand; // Only transactions involving cash in hand
+    } else if (accountVal !== null) { // Check for actual account selection
+        accountCondition = (trx) => trx.account_id && trx.account_id.id === accountVal; // Filter by selected account
+    }
+
+    //for trx_cat (based on trx_type)    
+    if (categoryVal === -12) {
+        categoryCondition = () => true; // No filtering for 'All' categories
+    } else if (categoryVal !== null) { // Check for actual category selection
+        categoryCondition = (trx) => trx.trx_category_id && trx.trx_category_id.id === categoryVal; // Filter by selected category
+    }
+
+    //final filter method
+    let filteredTrxs = allTrxListByUser.filter(trx =>
+        dateCondition(trx) &&
+        trxTypeCondition(trx) &&
+        accountCondition(trx) &&
+        categoryCondition(trx)
+    );
+
+    console.log("filteredTrxs ", filteredTrxs);
+
+    $('#allTrxListDisplayContainer').empty();
+
+    // Destroy DataTable instance manually
+    if ($.fn.DataTable.isDataTable('#allTrxTable')) {
+        $('#allTrxTable').DataTable().clear().destroy();
+    }
+
+    displayTrxs(filteredTrxs);
+
+    setTimeout(() => {
+        $('#allTrxTable').DataTable({
+            destroy: true, 
+            paging: true,  
+            searching: false, 
+            info: false, 
+            pageLength: 10,
+            lengthChange: false,
+            ordering: false  
+        });
+    }, 1000);
 }
 
 /**SELECT * FROM financeappdb.trx 
