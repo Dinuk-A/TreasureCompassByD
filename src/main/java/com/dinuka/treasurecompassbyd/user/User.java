@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+// import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.dinuka.treasurecompassbyd.currency.Currency;
@@ -53,10 +53,6 @@ public class User {
     @NotNull
     private String lastname;
 
-    @Column(name = "dob")
-    @NotNull
-    private LocalDate dob;
-
     @Column(name = "created_at")
     @NotNull
     private LocalDateTime created_at;
@@ -75,6 +71,5 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "base_currency_id" , referencedColumnName = "id")
     private Currency base_currency_id;
-
 
 }

@@ -1,29 +1,122 @@
-<form id="signupForm">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
+<!DOCTYPE html>
+<html lang="en">
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
 
-    <button type="submit">Sign Up</button>
-</form>
+    <!-- link bootstrp css -->
+    <link rel="stylesheet" href="resources/bootstrap-5.2.3/css/bootstrap.min.css">
+
+    <!-- link bootsrtap js file -->
+    <script src="resources/bootstrap-5.2.3/js/bootstrap.bundle.min.js"></script>
+
+    <!-- link common fn -->
+    <script src="resources/CommonFnfiles/commonFn.js"></script>
+
+    <!-- link jquery  -->
+    <script src="resources/CommonFnfiles/jQuery.js"></script>
+
+</head>
+
+<body>
+    <form id="signupForm" onsubmit="return false" class="bg-light p-2">
+        <div class="row mt-2">
+            <div class="col-4">
+                <label class="form-lable fw-bold" for="email">Email:</label>
+            </div>
+
+            <div class="col-8">
+                <input class="form-control form-input" type="email" id="initialEmail" required
+                    onkeyup="validateEmail();">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-4">
+                <label class="form-lable fw-bold" for="password">Password:</label>
+            </div>
+
+            <div class="col-8">
+                <input class="form-control form-input" type="password" id="intialPassword" required>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-4">
+                <label class="form-lable fw-bold" for="password">Confirm Password:</label>
+            </div>
+
+            <div class="col-8">
+                <input class="form-control form-input" type="password" id="passwordReType" required
+                    onkeyup="validatePw(this);">
+            </div>
+        </div>
+
+        <div class="row col-4 mx-auto text-center mt-4">
+            <button class="btn btn-info" type="submit" onclick="submitEmailToVerify();">Continue</button>
+        </div>
+
+    </form>
+
+
+</body>
 
 <script>
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        let formData = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        };
-        
-        fetch('/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        }).then(response => response.json())
-          .then(data => alert(data.message))
-          .catch(error => console.error('Error:', error));
+    //create an empty object to bind values so later we can send that in a ajax post request
+    window.addEventListener('load', () => {
+        userObj = new Object;
     });
+
+    //validate email
+    const validateEmail = () => {
+        const regPatternForEmail = new RegExp('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+
+        if (initialEmail.value !== "") {
+            if (regPatternForEmail.test(initialEmail.value)) {
+                userObj.email = initialEmail.value;
+                initialEmail.style.border = "2px solid lime";
+            } else {
+                initialEmail.style.border = "2px solid red";
+                userObj.email = null;
+            }
+        } else {
+            initialEmail.style.border = "2px solid red";
+            userObj.email = null;
+        }
+    };
+
+
+    const submitEmailToVerify = () => {
+
+        //send email & pw addr to backend by ajax
+        let postServiceResponse = ajaxRequest('/user/initialsignup', 'post', userObj)
+        if (postServiceResponse == "OK") {
+            alert('success');
+        } else {
+            alert("An error occured \n" + postServiceResponse);
+        }
+
+        //check existence (these code happens in backend)
+        //if exist, pass that info to fronend,, redirect to login page
+        //if not, pass that info to fronend,, send email with otp( these code happens in backend(call otp generation url))
+
+        //appear new section in the same page to enter otp
+        //if otp correct redirect to userinfo enter page
+    }
+
+    //validate pw
+    const validatePw = (fieldId) => {
+        if (intialPassword.value == fieldId.value) {
+            fieldId.style.border = "2px solid lime";
+            userObj.password = fieldId.value;
+        } else {
+            fieldId.style.border = "2px solid red";
+            userObj.password = null;
+        }
+    }
+
 </script>
+
+</html>

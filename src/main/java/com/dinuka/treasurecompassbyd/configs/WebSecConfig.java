@@ -21,7 +21,9 @@ public class WebSecConfig {
                     .requestMatchers("JSfiles/**", "resources/**").permitAll()
 
                     .requestMatchers("/login").permitAll()
+                    .requestMatchers("/signup").permitAll()
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers("/user/initialsignup").permitAll()
                     // .requestMatchers("/user/**").permitAll()
                     .requestMatchers("/dashboard").permitAll()
                     .requestMatchers("/createuser").permitAll()

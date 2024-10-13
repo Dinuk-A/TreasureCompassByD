@@ -21,4 +21,5 @@ public interface UserDao extends JpaRepository<User , Integer> {
     @Query(value = "select u from User u where u.id =?1")
     public User getUserByUserId(int userID);
 
+    boolean existsByEmail(String email);
 }

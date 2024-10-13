@@ -38,10 +38,3 @@ public class Verification {
     private User user_id;
     
 }
-
-/*
- * id int AI PK
- * token varchar(255)
- * expires_at timestamp
- * user_id int
- */

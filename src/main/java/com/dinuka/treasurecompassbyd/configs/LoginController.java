@@ -27,7 +27,6 @@ public class LoginController {
     public ModelAndView dashboardUI() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // User loggedUser = uDao.getByUName(auth.getName());
         User loggedUser = uDao.getUserByEmail(auth.getName());
 
         ModelAndView dbView = new ModelAndView();
@@ -42,6 +41,13 @@ public class LoginController {
         dbView.addObject("baseCurrencyCode", loggedUser.getBase_currency_id().getCode());
        
         return dbView;
+    }
+
+    @GetMapping(value = "/signup")
+    public ModelAndView signupUi() {
+        ModelAndView signUpPageView = new ModelAndView();
+        signUpPageView.setViewName("signup.html");
+        return signUpPageView;
     }
 
     @GetMapping(value = "/error")
