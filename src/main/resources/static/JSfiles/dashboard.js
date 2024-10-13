@@ -234,6 +234,8 @@ const refillAccountInfo = (obj) => {
 
     accountObj = JSON.parse(JSON.stringify(obj));
 
+    btnAccUpdate.disabled = false;
+
     $('#modalAddNewAccount').modal('show');
 
     inputAccName.value = accountObj.acc_display_name;
@@ -258,7 +260,7 @@ const updateAccount = () => {
             alert("Successfully Updated");
             $('#modalAddNewAccount').modal('hide');
             formAddNewAccount.reset();
-            refreshAddAccForm();
+            
             window.location.reload();
 
         } else {

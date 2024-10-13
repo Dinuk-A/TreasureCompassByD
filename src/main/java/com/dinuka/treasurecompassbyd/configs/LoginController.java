@@ -27,9 +27,11 @@ public class LoginController {
     public ModelAndView dashboardUI() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        User loggedUser = uDao.getByUName(auth.getName());
+        // User loggedUser = uDao.getByUName(auth.getName());
+        User loggedUser = uDao.getUserByEmail(auth.getName());
 
         ModelAndView dbView = new ModelAndView();
+
         dbView.setViewName("dashboard.html");
 
         dbView.addObject("loggedusername", auth.getName());

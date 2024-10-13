@@ -46,7 +46,8 @@ public class AccountController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        User loggedUser = uDao.getByUName(auth.getName());
+        // User loggedUser = uDao.getByUName(auth.getName());
+        User loggedUser = uDao.getUserByEmail(auth.getName());
         // Integer loggedUserId = loggedUser.getId();
         
         try {

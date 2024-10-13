@@ -68,7 +68,7 @@ const displayTrxs = (arrayName) => {
         }
 
         //will be used later in accountCell
-        let accDisplayName = trx.is_involve_cashinhand ? "Cash In Hand" : trx.account_id.acc_display_name;
+        let accDisplayName = trx.is_involve_cashinhand ? "Physical Wallet" : trx.account_id.acc_display_name;
 
         // Create table row
         const row = document.createElement('tr');
@@ -311,17 +311,17 @@ const resetFilters = () => {
         $('#allTrxTable').DataTable().clear().destroy();
     }
     displayTrxs(allTrxListByUser);
-  setTimeout(() => {
-        $('#allTrxTable').DataTable({
-            destroy: true, 
-            paging: true,  
-            searching: false, 
-            info: false, 
-            pageLength: 10, 
-            lengthChange: false, 
-            ordering: false  
-        });
-    }, 1000);
+//   setTimeout(() => {
+//         $('#allTrxTable').DataTable({
+//             destroy: true, 
+//             paging: true,  
+//             searching: false, 
+//             info: false, 
+//             pageLength: 10, 
+//             lengthChange: false, 
+//             ordering: false  
+//         });
+//     }, 0);
 }
 
 //for apply filter button

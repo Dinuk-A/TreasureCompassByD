@@ -49,7 +49,7 @@ public class MainTrxController {
     public ModelAndView loginUI() {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User loggedUser = uDao.getByUName(auth.getName());
+        User loggedUser = uDao.getUserByEmail(auth.getName());
         ModelAndView allTrxView = new ModelAndView();
         allTrxView.addObject("loggedusername", auth.getName());
         allTrxView.addObject("loggeduserID", loggedUser.getId());
@@ -61,7 +61,7 @@ public class MainTrxController {
     public String saveTransactionInfo(@RequestBody MainTrx trxEntity) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            User loggedUser = uDao.getByUName(auth.getName());
+            User loggedUser = uDao.getUserByEmail(auth.getName());
             trxEntity.setUser_id(loggedUser.getId());
 
             // Retrieve current cash in hand balance
@@ -133,7 +133,7 @@ public class MainTrxController {
         try {
             // Authenticate the user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            User loggedUser = uDao.getByUName(auth.getName());
+            User loggedUser = uDao.getUserByEmail(auth.getName());
 
             // Retrieve original (current) cash in hand balance
             BigDecimal currentCashInHandBal = loggedUser.getCash_in_hand();

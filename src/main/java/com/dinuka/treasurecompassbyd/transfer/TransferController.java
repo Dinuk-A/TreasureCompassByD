@@ -41,7 +41,8 @@ public class TransferController {
     public String saveTransferInfo(@RequestBody Transfer trfrEntity) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User loggedUser = uDao.getByUName(auth.getName());
+        // User loggedUser = uDao.getByUName(auth.getName());
+        User loggedUser = uDao.getUserByEmail(auth.getName());
 
         try {
             // Get the current balance of user's physical wallet (cash in hand)
@@ -73,7 +74,6 @@ public class TransferController {
             if (trfrEntity.getSource_account_id().getId() == -10) {
 
                 trfrEntity.setSource_account_id(null);
-
                 trfrEntity.setIs_from_phy_wall(true);
                 trfrEntity.setIs_to_phy_wall(false);
 
@@ -136,10 +136,19 @@ public class TransferController {
             newExpenseRecord.setUser_id(loggedUser.getId());
             newExpenseRecord.setTrfr_id(trfrEntity.getId());
 
-            if (trfrEntity.getSource_account_id().getId() != -10) {
+            //original
+            // if (trfrEntity.getSource_account_id().getId() != -10) {
+            //     newExpenseRecord.setAccount_id(trfrEntity.getSource_account_id());
+            //     newExpenseRecord.setIs_involve_cashinhand(false);
+            // } else if (trfrEntity.getSource_account_id().getId() == -10) {
+            //     newExpenseRecord.setIs_involve_cashinhand(true);
+            //     newExpenseRecord.setAccount_id(null);
+            // }
+
+            if (trfrEntity.getSource_account_id() != null) {
                 newExpenseRecord.setAccount_id(trfrEntity.getSource_account_id());
                 newExpenseRecord.setIs_involve_cashinhand(false);
-            } else if (trfrEntity.getSource_account_id().getId() == -10) {
+            } else if (trfrEntity.getSource_account_id() == null) {
                 newExpenseRecord.setIs_involve_cashinhand(true);
                 newExpenseRecord.setAccount_id(null);
             }
@@ -156,6 +165,14 @@ public class TransferController {
             newIncomeRecord.setUser_id(loggedUser.getId());
             newIncomeRecord.setTrfr_id(trfrEntity.getId());
 
+            //original
+            // if (trfrEntity.getDestination_account_id().getId() != -10) {
+            //     newIncomeRecord.setAccount_id(trfrEntity.getDestination_account_id());
+            //     newIncomeRecord.setIs_involve_cashinhand(false);
+            // } else if (trfrEntity.getDestination_account_id().getId() == -10) {
+            //     newIncomeRecord.setIs_involve_cashinhand(true);
+            //     newIncomeRecord.setAccount_id(null);
+            // }
             if (trfrEntity.getDestination_account_id().getId() != -10) {
                 newIncomeRecord.setAccount_id(trfrEntity.getDestination_account_id());
                 newIncomeRecord.setIs_involve_cashinhand(false);

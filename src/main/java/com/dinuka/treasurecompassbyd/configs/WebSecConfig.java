@@ -31,7 +31,7 @@ public class WebSecConfig {
                 .formLogin((logins) -> {
                     logins
                             .loginPage("/login")
-                            .usernameParameter("username")
+                            .usernameParameter("email")
                             .passwordParameter("password")
                             .defaultSuccessUrl("/dashboard", true)
                             .failureUrl("/login?error=invalidusernamepassword");
