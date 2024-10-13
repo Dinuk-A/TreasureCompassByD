@@ -43,4 +43,4 @@ src/main/resources/static/resources/bootstrap-5.2.3
 
 /src/main/resources/application.properties
 
-
+src/main/java/com/dinuka/treasurecompassbyd/configs/EmailConfig.java
