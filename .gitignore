@@ -41,4 +41,6 @@ src/main/resources/static/resources/datatables-1.13.6/
 
 src/main/resources/static/resources/bootstrap-5.2.3
 
+/src/main/resources/application.properties
+
 
