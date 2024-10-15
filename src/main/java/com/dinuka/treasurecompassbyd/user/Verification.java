@@ -31,7 +31,7 @@ public class Verification {
     private String token;
 
     @Column(name = "expires_at")
-    private LocalDateTime expires_at;
+    private LocalDateTime expiresAt;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")

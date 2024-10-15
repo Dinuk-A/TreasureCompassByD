@@ -21,6 +21,7 @@
 </head>
 
 <body>
+    <!-- main signup form -->
     <form id="signupForm" onsubmit="return false" class="bg-light p-2">
         <div class="row mt-2">
             <div class="col-4">
@@ -58,7 +59,29 @@
             <button class="btn btn-info" type="submit" onclick="submitEmailToVerify();">Continue</button>
         </div>
 
+        <!-- hidden -->
+        <div class="spinner-border text-info" id="loadingSpinner" style="display: none;"></div>
+
     </form>
+    <!-- main signup form ends-->
+
+    <!-- verify otp form -->
+    <form onsubmit="return false" id="verifyOTPForm" class="d-none">
+        <div class="row mt-2 mx-auto">
+            <div class="col-4">
+                <label class="form-lable fw-bold" for="inputOTP">OTP:</label>
+            </div>
+
+            <div class="col-4">
+                <input class="form-control form-input" type="number" id="inputOTP" required>
+            </div>
+
+            <div class="row col-2 mx-auto text-center mt-2">
+                <button class="btn btn-info" type="submit" onclick="submitOTP();">Verify</button>
+            </div>
+        </div>
+    </form>
+    <!-- verify otp form ends -->
 
 
 </body>
@@ -67,6 +90,7 @@
     //create an empty object to bind values so later we can send that in a ajax post request
     window.addEventListener('load', () => {
         userObj = new Object;
+        otpVrfcnObj = new Object;
     });
 
     //validate email
@@ -90,20 +114,20 @@
 
     const submitEmailToVerify = () => {
 
+        document.getElementById("loadingSpinner").style.display = "block ";
         //send email & pw addr to backend by ajax
         let postServiceResponse = ajaxRequest('/user/initialsignup', 'post', userObj)
         if (postServiceResponse == "OK") {
-            alert('success');
+
+            document.getElementById("loadingSpinner").style.display = "none";
+            alert('check your email and enter the OTP recieved');
+            document.getElementById("verifyOTPForm").classList.remove("d-none")
+
         } else {
+
+            document.getElementById("loadingSpinner").style.display = "none";
             alert("An error occured \n" + postServiceResponse);
         }
-
-        //check existence (these code happens in backend)
-        //if exist, pass that info to fronend,, redirect to login page
-        //if not, pass that info to fronend,, send email with otp( these code happens in backend(call otp generation url))
-
-        //appear new section in the same page to enter otp
-        //if otp correct redirect to userinfo enter page
     }
 
     //validate pw
@@ -117,6 +141,25 @@
         }
     }
 
+    const submitOTP = () => {
+        const inputOtp = document.getElementById("inputOTP").value;
+        const email = userObj.email;
+
+        otpVrfcnObj = {
+            token: inputOtp,
+            email: email
+        };
+
+        let otpResponse = ajaxRequest('/user/verifyOtp', 'post', otpVrfcnObj);
+
+        if (otpResponse == "OTP verified successfully.") {
+            alert("Verification successful! You are now registered.");
+          
+        } else {
+            alert("Verification failed: " + otpResponse);
+        }
+
+    }
 </script>
 
 </html>

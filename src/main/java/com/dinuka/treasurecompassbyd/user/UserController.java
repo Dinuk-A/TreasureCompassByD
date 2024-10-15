@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,6 +51,7 @@ public class UserController {
 
     // signup process(only email and pw first)
     @PostMapping("/user/initialsignup")
+    @Transactional
     public String signUpUser(@RequestBody SignUpReq signUpReq) {
         try {
 
@@ -62,9 +67,9 @@ public class UserController {
             unverifiedNewUser.setStatus(false);
             unverifiedNewUser.setIs_verified(false);
 
-            unverifiedNewUser.setFirstname("First");
-            unverifiedNewUser.setLastname("Last");
-            unverifiedNewUser.setUsername("UN");
+            unverifiedNewUser.setFirstname("First Name Dummy");
+            unverifiedNewUser.setLastname("Last Name Dummy");
+            unverifiedNewUser.setUsername("Username Dummy");
             unverifiedNewUser.setCash_in_hand(BigDecimal.ZERO);
             unverifiedNewUser.setBase_currency_id(null);
 
@@ -76,7 +81,7 @@ public class UserController {
             String otp = genToken();
             Verification vrfcn = new Verification();
             vrfcn.setToken(otp);
-            vrfcn.setExpires_at(LocalDateTime.now().plusMinutes(60));
+            vrfcn.setExpiresAt(LocalDateTime.now().plusMinutes(15));
             vrfcn.setUser_id(unverifiedNewUser);
 
             vDao.save(vrfcn);
@@ -93,7 +98,15 @@ public class UserController {
 
     // gen OTP
     public String genToken() {
-        return UUID.randomUUID().toString();
+
+        // original(token too long)
+        // return UUID.randomUUID().toString();
+
+        // gen only 8 digits
+        Random rndm = new Random();
+        int otp = 10000000 + rndm.nextInt(90000000);
+        return String.valueOf(otp);
+
     }
 
     // generate an email
@@ -101,7 +114,8 @@ public class UserController {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Your OTP for Email Verification");
-        message.setText("Your OTP code is: " + token);
+        message.setText(
+                "Your OTP code is: " + token + " Please use this code within 15 minutes to successfully create an account");
 
         javaMailSender.send(message); // Send the email
     }
@@ -119,6 +133,45 @@ public class UserController {
             return "Save Not Completed Because :" + e.getMessage();
         }
 
+    }
+
+    // to verify OTP
+    @PostMapping("/user/verifyOtp")
+    public String verifyOtp(@RequestBody OTPVerificationReq otpVerfctnReq) {
+        Optional<Verification> verification = vDao.findByToken(otpVerfctnReq.getToken());
+
+        if (verification.isPresent()) {
+            Verification vrfcn = verification.get();
+
+            if (LocalDateTime.now().isAfter(vrfcn.getExpiresAt())) {
+                return "OTP has expired. Please request a new OTP.";
+            }
+
+            if (vrfcn.getUser_id().getEmail().equals(otpVerfctnReq.getEmail())) {
+                User verifiedUser = vrfcn.getUser_id();
+                verifiedUser.setIs_verified(true);
+                uDao.save(verifiedUser);
+
+                //delete vrfcn record later
+                //vDao.delete(vrfcn);
+
+                return "OTP verified successfully.";
+            } else{
+                return "Invalid OTP or email.";
+            }
+        } else{
+            return "Invalid OTP or email.";
+        }
+
+
+        // if (vrfcn.isPresent() && vrfcn.get().getUser_id().getEmail().equals(otpVerfctnReq.getEmail())) {
+        //     User verifiedUser = vrfcn.get().getUser_id();
+        //     verifiedUser.setIs_verified(true);
+        //     uDao.save(verifiedUser);
+        //     return "OTP verified successfully.";
+        // } else {
+        //     return "Invalid OTP or email.";
+        // }
     }
 
     // to update user info
