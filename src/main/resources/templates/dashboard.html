@@ -22,28 +22,23 @@
             border-radius: 10px !important;
             width: 100% !important;
             max-width: 550px !important;
-            /* Increased height to give more breathing room */
-            height: 450px !important;
+            min-height: 400px !important;
+            /* Changed to min-height */
             box-sizing: border-box !important;
-            /* Center content vertically */
             display: flex !important;
             flex-direction: column !important;
-            justify-content: center !important;
-        }
-
-        .chart-container canvas {
-            /* Set a specific height that works well for both charts */
-            height: 350px !important;
-            width: 100% !important;
-            margin: auto !important;
-            /* This helps with vertical centering */
+            align-items: center !important;
         }
 
         .chart-title {
             color: #ffffff !important;
             margin-bottom: 15px !important;
-            /* Keep title at top */
-            flex-shrink: 0 !important;
+        }
+
+        /* Remove specific canvas styling and let Chart.js handle it */
+        .chart-container canvas {
+            /* Only keep display block to prevent layout issues */
+            display: block !important;
         }
     </style>
 </head>
@@ -91,11 +86,11 @@
         <div class="chart-row mt-4 mx-auto mb-5">
             <div class="col-6 chart-container text-center">
                 <h5 class="chart-title">Account Balance Overview</h5>
-                <canvas id="accountBalanceChart" width="600" height="300"></canvas>
+                <canvas id="accountBalanceChart" width="400" height="400"></canvas>
             </div>
             <div class="col-6 chart-container text-center">
                 <h5 class="chart-title">Monthly Income vs Expense</h5>
-                <canvas id="monthlyTrxChart" width="600" height="300"></canvas>
+                <canvas id="monthlyTrxChart" width="400" height="400"></canvas>
             </div>
         </div>
 
