@@ -6,6 +6,46 @@
 <head>
     <!-- Main JS File -->
     <script src="JSfiles/dashboard.js"></script>
+
+    <style>
+        .chart-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            gap: 20px !important;
+            max-width: 1200px !important;
+            margin: 0 auto;
+        }
+
+        .chart-container {
+            padding: 20px !important;
+            background-color: #1c1c3c !important;
+            border-radius: 10px !important;
+            width: 100% !important;
+            max-width: 550px !important;
+            /* Increased height to give more breathing room */
+            height: 450px !important;
+            box-sizing: border-box !important;
+            /* Center content vertically */
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+        }
+
+        .chart-container canvas {
+            /* Set a specific height that works well for both charts */
+            height: 350px !important;
+            width: 100% !important;
+            margin: auto !important;
+            /* This helps with vertical centering */
+        }
+
+        .chart-title {
+            color: #ffffff !important;
+            margin-bottom: 15px !important;
+            /* Keep title at top */
+            flex-shrink: 0 !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -47,7 +87,20 @@
             </div>
         </div>
 
-        <!-- row 2 display 5 recent trxs ✅ and quick buttons ✅-->
+        <!-- row 2 display charts -->
+        <div class="chart-row mt-4 mx-auto mb-5">
+            <div class="col-6 chart-container text-center">
+                <h5 class="chart-title">Account Balance Overview</h5>
+                <canvas id="accountBalanceChart" width="600" height="300"></canvas>
+            </div>
+            <div class="col-6 chart-container text-center">
+                <h5 class="chart-title">Monthly Income vs Expense</h5>
+                <canvas id="monthlyTrxChart" width="600" height="300"></canvas>
+            </div>
+        </div>
+
+
+        <!-- row 3 display 5 recent trxs ✅ and quick buttons ✅-->
         <div class="row mt-4 mx-auto mb-5">
 
             <div class="col-8">
@@ -228,7 +281,8 @@
                     <div class="modal-footer py-0">
                         <button type="reset" class="btn btn-danger">Clear</button>
 
-                        <button type="button" id="btnAccUpdate" class="btn btn-warning" onclick="updateAccount();" disabled>Update</button>
+                        <button type="button" id="btnAccUpdate" class="btn btn-warning" onclick="updateAccount();"
+                            disabled>Update</button>
 
                         <button type="button" class="btn btn-primary" onclick="submitNewAccount();">Save</button>
 
@@ -475,7 +529,6 @@
                 </div>
             </div>
         </div>
-
 
         <!-- to get the loggeduser id in backend ✅  -->
         <div class="col-4 d-none">

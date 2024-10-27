@@ -7,6 +7,9 @@ window.addEventListener('load', () => {
     refreshAccCards();
     displayTrxList();
 
+    fetchAndCreateAccountBalanceChart();
+    fetchAndCreateMonthlyTrxChart();
+
 
 });
 
@@ -75,7 +78,6 @@ const refreshAccCards = () => {
     // Display account cards
     accListByUser.forEach(account => {
 
-        // if (account.status) {
         const mainCol = document.createElement('div');
         mainCol.className = "col-md-4";
 
@@ -139,7 +141,7 @@ const refreshAccCards = () => {
         mainCol.appendChild(cardDiv);
 
         sectionAccCardList.appendChild(mainCol);
-        // }
+
     });
 
     // If fewer than 3 accounts(and also status is must true), show the "Add New Account" card dynamically
@@ -260,7 +262,7 @@ const updateAccount = () => {
             alert("Successfully Updated");
             $('#modalAddNewAccount').modal('hide');
             formAddNewAccount.reset();
-            
+
             window.location.reload();
 
         } else {
@@ -534,3 +536,189 @@ const submitNewTransfer = () => {
 }
 
 //======TRANSFER======
+
+
+//======CHARTS ======
+
+//dashboard pie chart shows how much money in diff accs/cih
+function fetchAndCreateAccountBalanceChart() {
+    const userID = document.getElementById('loggedUserIdHiddenValueID').innerText;
+
+    // Retrieve account details and user's cash-in-hand balance with AJAX requests
+    const accListByUser = ajaxGetRequest("/account/byuserid/" + userID) || [];
+    const user = ajaxGetRequest("/user/byid/" + userID);
+    const cashInHand = user?.cash_in_hand || 0;
+
+    // If no accounts and no cash-in-hand, exit function
+    if (accListByUser.length === 0 && cashInHand === 0) {
+        console.log("No accounts or cash in hand to display.");
+        return;
+    }
+
+    // Prepare data for the chart
+    const accountNames = accListByUser.map(acc => acc.acc_display_name);
+    const accountBalances = accListByUser.map(acc => acc.balance);
+
+    // If cash in hand exists, add it as a separate entry
+    if (cashInHand > 0) {
+        accountNames.push('Cash in Hand');
+        accountBalances.push(cashInHand);
+    }
+
+    // Calculate total balance including cash in hand
+    const totalBalance = accountBalances.reduce((a, b) => a + b, 0);
+
+    // Create the chart
+    createAccountBalanceChart(accountNames, accountBalances, totalBalance);
+}
+
+// Function to create the chart with data passed as parameters
+function createAccountBalanceChart(accountNames, accountBalances, totalBalance) {
+    const ctx = document.getElementById('accountBalanceChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: accountNames,  // Account names and 'Cash in Hand' label
+            datasets: [{
+                label: 'Account Balances',
+                data: accountBalances,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.8)',   // Soft Teal
+                    'rgba(54, 162, 235, 0.8)',   // Light Blue
+                    'rgba(153, 102, 255, 0.8)',  // Lavender
+                    'rgba(255, 159, 64, 0.8)'    // Peach
+                ],
+                borderColor: 'rgba(255, 255, 255, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: 'white'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.label || '';
+                            const value = context.raw;
+                            return `${label}: $${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw: function (chart) {
+                const { width, height, ctx } = chart;
+                ctx.restore();
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(`Total: $${totalBalance.toLocaleString()}`, width / 2, height / 2);
+                ctx.save();
+            }
+        }]
+    });
+}
+
+
+function fetchAndCreateMonthlyTrxChart() {
+    const userID = document.getElementById('loggedUserIdHiddenValueID').innerText;
+    const trxListByUser = ajaxGetRequest("/recenttrx/byuser/" + userID);
+
+    // Get the current month and year for filtering
+    const currentMonth = new Date().getMonth() + 1; // JavaScript months are 0-indexed
+    const currentYear = new Date().getFullYear();
+
+    // Initialize income and expense totals
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    // Filter and sum transactions based on type and current month/year
+    trxListByUser.forEach(trx => {
+        const trxDate = new Date(trx.trx_date);
+        const trxMonth = trxDate.getMonth() + 1;
+        const trxYear = trxDate.getFullYear();
+
+        // Check if transaction is within the current month and year
+        if (trxMonth === currentMonth && trxYear === currentYear) {
+            if (trx.trx_type === 'INCOME') {
+                totalIncome += parseFloat(trx.amount);
+            } else if (trx.trx_type === 'EXPENSE') {
+                totalExpense += parseFloat(trx.amount);
+            }
+        }
+    });
+
+    // Create the chart with the processed data
+    createMonthlyTrxChart(totalIncome, totalExpense);
+}
+
+// Step 2: Create the Bar Chart
+function createMonthlyTrxChart(totalIncome, totalExpense) {
+    const ctx = document.getElementById('monthlyTrxChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expense'],
+            datasets: [{
+                label: 'Total Amount ($)',
+                data: [totalIncome, totalExpense],
+                backgroundColor: [
+                    'rgba(0, 255, 0, 0.8)',  // Lime for Income
+                    'rgba(255, 0, 0, 0.8)'   // Red for Expense
+                ],
+                borderColor: 'rgba(255, 255, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw;
+                            return `${label}: $${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount ($)',
+                        color: 'white'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Transaction Type',
+                        color: 'white'
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+
+
+//======CHARTS ======

@@ -26,7 +26,7 @@ public class WebSecConfig {
                     .requestMatchers("/user/initialsignup").permitAll()
                     .requestMatchers("/user/verifyOtp").permitAll()
                     // .requestMatchers("/user/**").permitAll()
-                    .requestMatchers("/dashboard").permitAll()
+                    // .requestMatchers("/dashboard").permitAll()
                     .requestMatchers("/createuser").permitAll()
                     .anyRequest().authenticated();
         })
